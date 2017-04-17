@@ -1,0 +1,19 @@
+{
+    "remotePath": "/cs/student/hoxmark/Dev/CS162",
+    "host": "csil.cs.ucsb.edu",
+    "username": "hoxmark",
+    "password": "Geekftw92",
+    "port": 22,
+    "secure": true,
+    "protocol": "sftp",
+    "uploadOnSave": true,
+    "passive": false,
+    "debug": false,
+    "privateKeyPath": null,
+    "passphrase": null,
+    "ignore": [
+        "\\.vscode",
+        "\\.git",
+        "\\.DS_Store"
+    ]
+}

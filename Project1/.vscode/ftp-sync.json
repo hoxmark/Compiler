@@ -1,0 +1,19 @@
+{
+    "remotePath": "/cs/student/hoxmark/Dev/Compiler/Project1/",
+    "host": "host",
+    "username": "username",
+    "password": "password",
+    "port": 21,
+    "secure": false,
+    "protocol": "ftp",
+    "uploadOnSave": false,
+    "passive": false,
+    "debug": false,
+    "privateKeyPath": null,
+    "passphrase": null,
+    "ignore": [
+        "\\.vscode",
+        "\\.git",
+        "\\.DS_Store"
+    ]
+}
