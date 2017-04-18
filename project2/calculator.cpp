@@ -69,7 +69,7 @@ Token Scanner::nextToken() {
     
     int num = 0; 
     if ( c == EOF ) return T_EOF;
-    cout<< "char:"<<c<<"\n";
+     cout<< "nextToken char:"<<c<<"\n";
     if ( isdigit(c)){
         cin >> num; 
         cin.putback(c);        
@@ -148,74 +148,6 @@ void Scanner::eatToken(Token toConsume) {
     if (toConsume != found){
         mismatchError(this->line, toConsume, found);
     }
-    // switch (toConsume){
-    //     case T_PLUS:       {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, findTokenFromChar(c));
-    //         }
-    //     }
-    //     case T_MINUS:      {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }                 
-    //     }
-    //     case T_MULTIPLY:   {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }               
-    //     }
-    //     case T_DIVIDE:     {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }               
-    //     }
-    //     case T_MODULO:     {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }               
-    //     }
-    //     case T_EXP:        {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }              
-    //     }
-    //     case T_OPENPAREN:  {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }               
-    //     }
-    //     case T_CLOSEPAREN: {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }              
-    //     }
-    //     case T_NUMBER:     {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }           
-    //     }
-    //     case T_SEMICOLON:  {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }               
-    //     }
-    //     case T_NEWLN:      {
-    //         Token found = findTokenFromChar(c);
-    //         if (toConsume != found){
-    //             mismatchError(this->line, toConsume, found);
-    //         }               
-    //     }
-    // }
 }
 
 int Scanner::lineNumber() {
@@ -254,7 +186,14 @@ Parser::Parser(bool eval) : evaluate(eval) {
 
 
 void Parser::parse() {
+    cout<< "Parser Start"<<"\n";
     start();
+    
+    // Token nextToken = scanner.nextToken();
+    // scanner.eatToken(nextToken);
+    // Token thisToken = nextToken;
+    // start(thisToken);
+
 }
 
 // void times
@@ -279,16 +218,94 @@ void Parser::parse() {
 // void E() { match(NUM); match(EQ); match(NUM); }
 
 
-void Parser::start() {
+//GRAMMER
+// Start -> ExprList
 
+// ExprList -> Expr ExprList’
+// ExprList’ -> ; Expr ExprList’
+// 	| ε 
+
+// Expr -> term Expr’
+// Expr’ -> 	+ term Expr’
+// 	| 	- term Expr
+// 	| 	epsilon 
+
+// term -> factor term’
+// term -> 	* factor term’
+// 	| 	/ factor term’ 
+// 	| 	epsilon 
+
+// factor -> num
+
+
+void Parser::start() {
+    exprList(); //TODO MAKE THIS EcprList
     // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
     // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
     // or less steps in the process.
     //
     // WRITEME
-
-   
 }
+
+void Parser::exprList(){
+    expr();
+    exprListP();
+}
+
+void Parser::exprListP(){
+    switch(scanner.nextToken()){
+        case T_SEMICOLON:{
+          scanner.eatToken(T_SEMICOLON);           
+          expr();
+          exprListP();  
+        } 
+        // case epsilon: //TODO?
+        default: cout<<"default in exprListP"<<"\n";
+    }
+}
+
+void Parser::expr(){
+    term();
+    exprP();
+}
+
+void Parser::exprP(){
+    cout <<"exprP"<<"\n";
+   switch (scanner.nextToken()){
+    //    case T_OPENPAREN: scanner.eatToken(); exprP(); break; 
+       case T_PLUS: cout<<"+"<<"\n"; scanner.eatToken(T_PLUS); term(); exprP(); break; 
+       case T_MINUS: scanner.eatToken(T_MINUS); term (); exprP(); break; 
+       default:  cout<< "DEFAULT exprP"<<"\n";
+   }
+}
+
+void Parser::term(){
+    factor();
+    termP();
+}
+
+void Parser::termP(){
+    cout<< "termP: "<<scanner.nextToken()<< "\n";
+    switch(scanner.nextToken()){
+        case T_MULTIPLY: scanner.eatToken(T_MULTIPLY); factor(); termP(); break;
+        case T_DIVIDE: scanner.eatToken(T_DIVIDE); factor(); termP(); break;
+        default: cout << "termP default"<<"\n";
+    }
+}
+
+void Parser::factor(){
+    cout<< "facotr: " <<scanner.nextToken()<<"\n";
+    switch(scanner.nextToken()){        
+        case T_NUMBER:{
+            cout<< "her:" << scanner.nextToken() << "\n"; 
+            scanner.eatToken(T_NUMBER);
+            break;
+        }    
+        default: cout<<"FACTOR default? "<<"\n";
+    }
+}
+
+
 
 // You will need to add more methods for this to work. Don't forget to also define them in calculator.hpp!
 // WRITEME

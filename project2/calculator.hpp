@@ -35,6 +35,13 @@ class Parser {
     
     bool evaluate;
     void start();
+    void exprList();
+    void exprListP();
+    void expr();
+    void exprP();
+    void term();
+    void termP();
+    void factor();
     // You will need to define the recursive descent functions you're going to use here.
     // WRITEME
 public:
