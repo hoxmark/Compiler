@@ -19,6 +19,9 @@ public:
     int lineNumber();
     int getNumberValue();
     int createValue(int);
+    Token checkDoubleStar();
+    Token checkDoubleStarAfterEaten(char);
+    Token findTokenFromChar(char);
     Scanner();
 };
 

@@ -31,6 +31,33 @@ Scanner::Scanner() : line(1),
     // }
 }
 
+Token Scanner::checkDoubleStar(){
+    char first; 
+    char sec; 
+
+    cin.get(first);
+    sec = cin.peek();
+    if (sec == '*'){
+        cin.putback(first);
+        return T_EXP;
+    } else {
+        cin.putback(first);
+        return T_MULTIPLY;      
+    }
+}
+
+Token Scanner::checkDoubleStarAfterEaten(char first){
+    char sec; 
+
+    sec = cin.peek();
+    if (sec == '*'){
+        cin.get(sec);
+        return T_EXP;
+    } else {
+        //cin.putback(first);
+        return T_MULTIPLY;      
+    }
+}
 // You need to fill this method with the appropriate code for it to work as described in the project description.
 Token Scanner::nextToken() {
     // I am a placeholder. Change me into something that can actually decypher the next token without consuming it.
@@ -42,7 +69,7 @@ Token Scanner::nextToken() {
     
     int num = 0; 
     if ( c == EOF ) return T_EOF;
-    // cout<< "char:"<<c<<"\n";
+    cout<< "char:"<<c<<"\n";
     if ( isdigit(c)){
         cin >> num; 
         cin.putback(c);        
@@ -51,10 +78,10 @@ Token Scanner::nextToken() {
     switch(c) {
         case '+' : return T_PLUS;
         case '-' : return T_MINUS;
-        case '*' : return T_MULTIPLY;
+        case '*' : return checkDoubleStar();
         case '/' : return T_DIVIDE;
         case '%' : return T_MODULO;
-        case '**': return T_EXP; //TODO this will never happend? 
+        //case '**': return T_EXP; //TODO this will never happend? 
         case '(' : return T_OPENPAREN;
         case ')' : return T_CLOSEPAREN;
         case ';' : return T_SEMICOLON;
@@ -73,14 +100,16 @@ Token Scanner::nextToken() {
     }
 }
 
-Token findTokenFromChar(char c){
+
+
+Token Scanner::findTokenFromChar(char c){
     switch(c) {
         case '+' : return T_PLUS;
         case '-' : return T_MINUS;
-        case '*' : return T_MULTIPLY;
+        case '*' : return checkDoubleStarAfterEaten(c);
         case '/' : return T_DIVIDE;
         case '%' : return T_MODULO;
-        case '**': return T_EXP; //TODO this will never happend? 
+        // case '**': return T_EXP; //TODO this will never happend? 
         case '(' : return T_OPENPAREN;
         case ')' : return T_CLOSEPAREN;
         case ';' : return T_SEMICOLON;
@@ -113,7 +142,7 @@ void Scanner::eatToken(Token toConsume) {
 
     char c; 
     cin.get(c); 
-    // cout << "eaten: " << c <<"\n" ;   
+    cout << "eaten: " << c <<"\n" ;   
 
     Token found = findTokenFromChar(c);
     if (toConsume != found){
@@ -204,6 +233,25 @@ Parser::Parser(bool eval) : evaluate(eval) {
     // WRITEME
 
 }
+
+// void S() {
+//   switch(scanner.nextToken) {
+//     case IF: {
+//         match(IF); 
+//         E(); 
+//         match(THEN); 
+//         S();
+//         match(ELSE); 
+//         S(); 
+//         break;
+//     }
+
+//     case BEGIN: match(BEGIN); S(); L(); break;
+//     case PRINT: match(PRINT); E(); break;
+//     default: error();
+//   }
+// }
+
 
 void Parser::parse() {
     start();
