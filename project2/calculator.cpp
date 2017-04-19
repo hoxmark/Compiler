@@ -124,7 +124,7 @@ Token Scanner::findTokenFromChar(char c){
         case '8' : return T_NUMBER;
         case '9' : return T_NUMBER;        
         case '\n': return T_NEWLN; 
-        default : cout << "ERROR in find token form char()"; //TODO, should i return line or line +1? 
+        default : return T_EOF; //TODO OK? 
     }
 }
 
@@ -142,8 +142,8 @@ void Scanner::eatToken(Token toConsume) {
 
     char c; 
     cin.get(c); 
-    cout << "eaten: " << c <<"\n" ;   
-
+    // cout << "eaten: " << c <<"\n" ;   
+// 
     Token found = findTokenFromChar(c);
     if (toConsume != found){
         mismatchError(this->line, toConsume, found);
@@ -171,30 +171,9 @@ void Parser::parse() {
     start();
 }
 
-//GRAMMER
-// Start -> ExprList
-
-// ExprList -> Expr ExprList’
-// ExprList’ -> ; Expr ExprList’
-// 	| ε 
-
-// Expr -> term Expr’
-// Expr’ -> 	+ term Expr’
-// 	| 	- term Expr
-// 	| 	epsilon 
-
-// term -> factor term’
-// term -> 	* factor term’
-// 	| 	/ factor term’ 
-// 	| 	epsilon 
-
-// factor -> num
-
-
 void Parser::start() {
     exprList(); 
     
-
     // scanner.eatToken(T_EOF);
     // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
     // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
@@ -269,7 +248,8 @@ void Parser::exppP(){
 
 // void Parser::parenP(){
 //     switch(scanner.nextToken()){
-//         case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); factor(); parenP(); scanner.eatToken(T_CLOSEPAREN); break;
+//         // case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); factor(); scanner.eatToken(T_CLOSEPAREN); break;
+//         //case T_NUMBER: factor(); break; 
 //         default: return; 
 //     }
 // }
@@ -278,26 +258,9 @@ void Parser::factor(){
     // cout<< "factor: " <<tokenToString(scanner.nextToken())<<"\n";
     switch(scanner.nextToken()){        
         case T_NUMBER:{
-            scanner.eatToken(T_NUMBER); break; 
+            scanner.eatToken(T_NUMBER); break;             
         }   
-        default: parseError(1, scanner.nextToken());
-        // default: {
-        //     // switch (scanner.nextToken()){
-        //     //    case T_MULTIPLY: break;
-        //     //    case T_DIVIDE: break;
-        //     //    case T_PLUS:break;
-        //     //    case T_MINUS:  break;
-        //     //    case T_EOF: break;
-        //     //    default: parseError(1, scanner.nextToken()); // Make line dynamic TODO
-        //     // }
-        // }
-        // case T_EOF: return;  
-        // default: mismatchError(1, T_NUMBER, scanner.nextToken());
+        case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); expr(); scanner.eatToken(T_CLOSEPAREN); break;
+        default: parseError(scanner.lineNumber(), scanner.nextToken());       
     }
 }
-
-
-
-// You will need to add more methods for this to work. Don't forget to also define them in calculator.hpp!
-// WRITEME
-
