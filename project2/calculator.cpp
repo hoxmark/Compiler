@@ -69,7 +69,7 @@ Token Scanner::nextToken() {
     
     int num = 0; 
     if ( c == EOF ) return T_EOF;
-     cout<< "nextToken char:"<<c<<"\n";
+    //  cout<< "nextToken char:"<<c<<"\n";
     if ( isdigit(c)){
         cin >> num; 
         cin.putback(c);        
@@ -142,7 +142,7 @@ void Scanner::eatToken(Token toConsume) {
 
     char c; 
     cin.get(c); 
-    cout << "eaten: " << c <<"\n" ;   
+    // cout << "eaten: " << c <<"\n" ;   
 
     Token found = findTokenFromChar(c);
     if (toConsume != found){
@@ -166,57 +166,10 @@ Parser::Parser(bool eval) : evaluate(eval) {
 
 }
 
-// void S() {
-//   switch(scanner.nextToken) {
-//     case IF: {
-//         match(IF); 
-//         E(); 
-//         match(THEN); 
-//         S();
-//         match(ELSE); 
-//         S(); 
-//         break;
-//     }
-
-//     case BEGIN: match(BEGIN); S(); L(); break;
-//     case PRINT: match(PRINT); E(); break;
-//     default: error();
-//   }
-// }
-
-
 void Parser::parse() {
-    cout<< "Parser Start"<<"\n";
+    // cout<< "Parser Start"<<"\n";
     start();
-    
-    // Token nextToken = scanner.nextToken();
-    // scanner.eatToken(nextToken);
-    // Token thisToken = nextToken;
-    // start(thisToken);
-
 }
-
-// void times
-
-// void L() {
-//   switch(lookahead) {
-//     case END: match(END); break;
-//     case SEMI: match(SEMI); S();
-//                L(); break;
-//     default: error();
-// } }
-
-// void S() {
-//   switch(lookahead) {
-//     case IF: match(IF); E(); match(THEN); S();
-//              match(ELSE); S(); break;
-//     case BEGIN: match(BEGIN); S(); L(); break;
-//     case PRINT: match(PRINT); E(); break;
-//     default: error();
-//   }
-// }
-// void E() { match(NUM); match(EQ); match(NUM); }
-
 
 //GRAMMER
 // Start -> ExprList
@@ -239,7 +192,10 @@ void Parser::parse() {
 
 
 void Parser::start() {
-    exprList(); //TODO MAKE THIS EcprList
+    exprList(); 
+    
+
+    // scanner.eatToken(T_EOF);
     // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
     // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
     // or less steps in the process.
@@ -259,8 +215,7 @@ void Parser::exprListP(){
           expr();
           exprListP();  
         } 
-        // case epsilon: //TODO?
-        default: cout<<"default in exprListP"<<"\n";
+        default: return; 
     }
 }
 
@@ -270,12 +225,12 @@ void Parser::expr(){
 }
 
 void Parser::exprP(){
-    cout <<"exprP"<<"\n";
+    // cout <<"@@@@@"<<"\n";
    switch (scanner.nextToken()){
-    //    case T_OPENPAREN: scanner.eatToken(); exprP(); break; 
-       case T_PLUS: cout<<"+"<<"\n"; scanner.eatToken(T_PLUS); term(); exprP(); break; 
-       case T_MINUS: scanner.eatToken(T_MINUS); term (); exprP(); break; 
-       default:  cout<< "DEFAULT exprP"<<"\n";
+        case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); term(); scanner.eatToken(T_CLOSEPAREN); break; 
+        case T_PLUS:  scanner.eatToken(T_PLUS); term(); exprP(); break; 
+        case T_MINUS: scanner.eatToken(T_MINUS); term (); exprP(); break; 
+        default: return; 
    }
 }
 
@@ -285,23 +240,37 @@ void Parser::term(){
 }
 
 void Parser::termP(){
-    cout<< "termP: "<<scanner.nextToken()<< "\n";
+    // cout<< "termP: "<< "\n";
     switch(scanner.nextToken()){
         case T_MULTIPLY: scanner.eatToken(T_MULTIPLY); factor(); termP(); break;
         case T_DIVIDE: scanner.eatToken(T_DIVIDE); factor(); termP(); break;
-        default: cout << "termP default"<<"\n";
+        case T_MODULO: scanner.eatToken(T_MODULO); factor(); termP(); break;
+        default:return; 
     }
 }
 
+
+
+
 void Parser::factor(){
-    cout<< "facotr: " <<scanner.nextToken()<<"\n";
+    // cout<< "factor: " <<tokenToString(scanner.nextToken())<<"\n";
     switch(scanner.nextToken()){        
         case T_NUMBER:{
-            cout<< "her:" << scanner.nextToken() << "\n"; 
-            scanner.eatToken(T_NUMBER);
-            break;
-        }    
-        default: cout<<"FACTOR default? "<<"\n";
+            scanner.eatToken(T_NUMBER); break; 
+        }   
+        default: parseError(1, scanner.nextToken());
+        // default: {
+        //     // switch (scanner.nextToken()){
+        //     //    case T_MULTIPLY: break;
+        //     //    case T_DIVIDE: break;
+        //     //    case T_PLUS:break;
+        //     //    case T_MINUS:  break;
+        //     //    case T_EOF: break;
+        //     //    default: parseError(1, scanner.nextToken()); // Make line dynamic TODO
+        //     // }
+        // }
+        // case T_EOF: return;  
+        // default: mismatchError(1, T_NUMBER, scanner.nextToken());
     }
 }
 
