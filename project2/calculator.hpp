@@ -41,6 +41,10 @@ class Parser {
     void exprP();
     void term();
     void termP();
+    void expp();
+    void exppP();
+    void paren();
+    void parenP();
     void factor();
     // You will need to define the recursive descent functions you're going to use here.
     // WRITEME

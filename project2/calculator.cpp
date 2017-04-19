@@ -142,7 +142,7 @@ void Scanner::eatToken(Token toConsume) {
 
     char c; 
     cin.get(c); 
-    // cout << "eaten: " << c <<"\n" ;   
+    cout << "eaten: " << c <<"\n" ;   
 
     Token found = findTokenFromChar(c);
     if (toConsume != found){
@@ -235,22 +235,44 @@ void Parser::exprP(){
 }
 
 void Parser::term(){
-    factor();
+    expp();
     termP();
 }
 
 void Parser::termP(){
     // cout<< "termP: "<< "\n";
     switch(scanner.nextToken()){
-        case T_MULTIPLY: scanner.eatToken(T_MULTIPLY); factor(); termP(); break;
-        case T_DIVIDE: scanner.eatToken(T_DIVIDE); factor(); termP(); break;
-        case T_MODULO: scanner.eatToken(T_MODULO); factor(); termP(); break;
+        case T_MULTIPLY: scanner.eatToken(T_MULTIPLY); expp(); termP(); break;
+        case T_DIVIDE: scanner.eatToken(T_DIVIDE); expp(); termP(); break;
+        case T_MODULO: scanner.eatToken(T_MODULO); expp(); termP(); break;
         default:return; 
     }
 }
 
 
+void Parser::expp(){
+    factor();
+    exppP();
+}
 
+void Parser::exppP(){
+    switch(scanner.nextToken()){
+        case T_EXP: scanner.eatToken(T_EXP); factor(); exppP(); break;
+        // case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); factor(); exppP(); scanner.eatToken(T_CLOSEPAREN); break;
+        default: return; 
+    }
+}
+
+// void Parser::paren(){
+//     parenP();
+// }
+
+// void Parser::parenP(){
+//     switch(scanner.nextToken()){
+//         case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); factor(); parenP(); scanner.eatToken(T_CLOSEPAREN); break;
+//         default: return; 
+//     }
+// }
 
 void Parser::factor(){
     // cout<< "factor: " <<tokenToString(scanner.nextToken())<<"\n";
