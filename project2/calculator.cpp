@@ -16,6 +16,7 @@ using namespace std;
 // string myfile; 
 bool eatenClean = true; 
 char oldChar; 
+string file; 
 
 // You may have to modify this constructor, although it might not be neccessary.
 Scanner::Scanner() : line(1), 
@@ -94,9 +95,10 @@ Token Scanner::nextToken() {
         case '6' : this->value = num;return T_NUMBER;
         case '7' : this->value = num;return T_NUMBER;
         case '8' : this->value = num;return T_NUMBER;
-        case '9' : this->value = num;return T_NUMBER;        
-        case '\n': this->line++; return T_NEWLN;  //TODO what baout new line? 
-        default : scanError(this->line, c); //TODO, should i return line or line +1? 
+        case '9' : this->value = num;return T_NUMBER;   
+        case ' ' : char x; cin.get(x); return nextToken();
+        case '\n': this->line++; eatToken(T_NEWLN); return nextToken() ;  
+        default : scanError(this->line, c); 
     }
 }
 
@@ -167,19 +169,17 @@ Parser::Parser(bool eval) : evaluate(eval) {
 }
 
 void Parser::parse() {
-    // cout<< "Parser Start"<<"\n";
     start();
 }
 
-void Parser::start() {
-    exprList(); 
-    
+void Parser::start() {    
     // scanner.eatToken(T_EOF);
     // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
     // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
     // or less steps in the process.
     //
     // WRITEME
+    exprList(); 
 }
 
 void Parser::exprList(){
@@ -190,9 +190,10 @@ void Parser::exprList(){
 void Parser::exprListP(){
     switch(scanner.nextToken()){
         case T_SEMICOLON:{
-          scanner.eatToken(T_SEMICOLON);           
-          expr();
-          exprListP();  
+          scanner.eatToken(T_SEMICOLON);     
+          exprList();      
+        //   expr();
+        //   exprListP();  
         } 
         default: return; 
     }
@@ -204,7 +205,6 @@ void Parser::expr(){
 }
 
 void Parser::exprP(){
-    // cout <<"@@@@@"<<"\n";
    switch (scanner.nextToken()){
         case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); term(); scanner.eatToken(T_CLOSEPAREN); break; 
         case T_PLUS:  scanner.eatToken(T_PLUS); term(); exprP(); break; 
@@ -237,30 +237,16 @@ void Parser::expp(){
 void Parser::exppP(){
     switch(scanner.nextToken()){
         case T_EXP: scanner.eatToken(T_EXP); factor(); exppP(); break;
-        // case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); factor(); exppP(); scanner.eatToken(T_CLOSEPAREN); break;
         default: return; 
     }
 }
 
-// void Parser::paren(){
-//     parenP();
-// }
-
-// void Parser::parenP(){
-//     switch(scanner.nextToken()){
-//         // case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); factor(); scanner.eatToken(T_CLOSEPAREN); break;
-//         //case T_NUMBER: factor(); break; 
-//         default: return; 
-//     }
-// }
-
 void Parser::factor(){
     // cout<< "factor: " <<tokenToString(scanner.nextToken())<<"\n";
     switch(scanner.nextToken()){        
-        case T_NUMBER:{
-            scanner.eatToken(T_NUMBER); break;             
-        }   
+        case T_NUMBER: scanner.eatToken(T_NUMBER); break; 
         case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); expr(); scanner.eatToken(T_CLOSEPAREN); break;
+        case T_EOF: return; 
         default: parseError(scanner.lineNumber(), scanner.nextToken());       
     }
 }
