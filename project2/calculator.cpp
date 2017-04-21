@@ -106,7 +106,6 @@ Token Scanner::findTokenFromChar(char c){
         case '*' : return checkDoubleStarAfterEaten(c);
         case '/' : return T_DIVIDE;
         case '%' : return T_MODULO;
-        // case '**': return T_EXP; //TODO this will never happend? 
         case '(' : return T_OPENPAREN;
         case ')' : return T_CLOSEPAREN;
         case ';' : return T_SEMICOLON;
@@ -130,7 +129,6 @@ Token Scanner::findTokenFromChar(char c){
 void Scanner::eatToken(Token toConsume) {
     // I am a placeholder. I'm not even fun. Change me into something that can actually consume tokens!
     // WRITEME
-    //((2+43)%6+12)/3; (2**3**2+19)%8
     //The eatToken function takes in a 
     //token that the parser expects, 
     //and verifies that it is the same as the 
@@ -147,33 +145,6 @@ void Scanner::eatToken(Token toConsume) {
     }
 
     Token found = findTokenFromChar(c);
-    //  switch (found){
-    //     case T_NUMBER: {val.push(this->value); 
-    //         break;
-    //     }
-    //     case T_PLUS : op.push(T_PLUS);  break;
-    //     case T_MINUS : op.push(T_MINUS); break;
-    //     case T_MULTIPLY: op.push(T_MULTIPLY); break;
-    //     case T_DIVIDE : op.push(T_DIVIDE); break;
-    //     case T_MODULO : op.push(T_MODULO); break;
-    //     case T_EXP : op.push(T_EXP); break;
-    //     case T_OPENPAREN : op.push(T_OPENPAREN); break;
-    //     case T_CLOSEPAREN : {
-    //         addTwoOperands();            
-    //         break;
-    //     } //op.push(T_CLOSEPAREN); break;
-    //     case T_SEMICOLON: {
-    //         if (!op.empty()) addTwoOperands(); 
-    //         cout<< val.top(); val.pop();            
-    //         break; 
-    //     }
-    //         //evaluStack(); break;
-    //     // default: cout<<"SJEKK EAT"<<"\n";
-    // } 
-    // cout << "Val:" << val.top() << "\n";
-    // cout << "Op:" << op.top() << "\n";
-
-
 
     if (toConsume != found){
         mismatchError(this->line, toConsume, found);
@@ -199,6 +170,7 @@ int Scanner::getNumberValue() {
 Parser::Parser(bool eval) : evaluate(eval) {
     // WRITEME
     // this->evaluate = eval;
+    this->lineNumber = 1;
 }
 
 
@@ -246,11 +218,8 @@ void Parser::parse() {
        for(vector<string>::const_iterator i = scanner.result.begin(); i != scanner.result.end(); ++i) {
             // cout << *i << "\n";             
             string currentString = *i;            
-            Token tok = findTokenFromString(currentString);
-           
-
-            // cout << tokenToString(tok)<<"\n";
-                    
+            Token tok = findTokenFromString(currentString);        
+            // cout << tokenToString(tok)<<"\n";                    
             switch (tok){
                 case T_NUMBER: {
                         int thisInt = stoi(currentString);
@@ -324,49 +293,39 @@ void Parser::parse() {
                     op.pop();                                        
                     break;
                 } 
-                case T_SEMICOLON: {                    
-                    // cout<< val.top(); val.pop(); 
-                    // cout<< "semi: " <<op.top();  
-                    // cout<<"op length: "<<op.size()<<"\n";
-                    // cout<< "val length: " << val.size()<<"\n";
+                case T_SEMICOLON: {                             
                     while (!op.empty()&&(val.size()>1)){addTwoOperands(); }
                     if (!val.empty()) {
                         checkForErrors(val.top());
-                        cout<<val.top()<<"\n"; val.pop();
+                        this->printOut += to_string(val.top());
+                        this->printOut += "\n"; 
+                        val.pop();
                     } 
                      
-                    while (!op.empty()) op.pop();//TODO ok? 
-                    
-
-                    // cout<<"op length: "<<op.size()<<"\n";
-                    // cout<< "val length: " << val.size()<<"\n";
-                    
+                    while (!op.empty()) op.pop();//TODO ok?                                                     
                     break; 
                 }
-                case T_NEWLN: break;
+                case T_NEWLN: this->lineNumber = this->lineNumber+ 1; break;
                 default: {
-                   return;                                    
+                   return;                                   
                 }
             }        
        }        
          
         while (!op.empty()&&(val.size()>1)){addTwoOperands(); }
-        // cout <<"_--";
         if (!val.empty()) {
             checkForErrors(val.top());
-            cout<<val.top()<<"\n";   
-        }
-
-       
-  
-        
+            this->printOut += to_string(val.top());   
+        }     
     }
+    cout << printOut;
 }
 
 
-void Parser::checkForErrors(int in){
-    if (in <= -(std::numeric_limits<int>::max())  || in >= (std::numeric_limits<int>::max())){ 
 
+void Parser::checkForErrors(long in){
+    if (in <= -(std::numeric_limits<int>::max())  || in >= (std::numeric_limits<int>::max())){ 
+        outOfBoundsError((this->lineNumber), in);
 
     }
 }
@@ -374,7 +333,6 @@ void Parser::checkForErrors(int in){
 bool Parser::isPrecidence(Token first, Token sec){
     if (sec == T_CLOSEPAREN || sec == T_OPENPAREN)
             return false;
-    // cout<<"checking: "<< tokenToString(first)<< " " << tokenToString(sec) << "\n";
     switch(first){
         case T_PLUS : {         
             if (   
@@ -384,7 +342,7 @@ bool Parser::isPrecidence(Token first, Token sec){
                     sec == T_EXP || 
                     sec == T_MODULO ){
                         return true; 
-            } else false; 
+            }  
             break; }
         case T_MINUS: {            
             if (   
@@ -395,7 +353,7 @@ bool Parser::isPrecidence(Token first, Token sec){
                     sec == T_EXP || 
                     sec == T_MODULO ){
                         return true; 
-            } else false;
+            } 
             break; }
         case T_MULTIPLY: {
             if (    
@@ -406,7 +364,7 @@ bool Parser::isPrecidence(Token first, Token sec){
                     // sec == T_MODULO 
                     ){
                         return false; 
-            }else true; 
+            } 
             break; 
         }
         case T_DIVIDE: {
@@ -418,7 +376,7 @@ bool Parser::isPrecidence(Token first, Token sec){
                     // sec == T_MODULO 
                     ){
                         return false; 
-            }else true; 
+            } 
             break;
         } 
         case T_MODULO: {
@@ -430,7 +388,7 @@ bool Parser::isPrecidence(Token first, Token sec){
                     // sec == T_MODULO ||
                     ){
                         return false; 
-            } else true; 
+            } 
             break;
         } 
         case T_EXP: {
@@ -443,7 +401,7 @@ bool Parser::isPrecidence(Token first, Token sec){
                     sec == T_MODULO 
                     ){
                         return false; 
-            } else true; 
+            }  
             break;
         } 
         default: return true ;//TODO DEFAULT? 
@@ -464,19 +422,17 @@ void Parser::addTwoOperands(){
             case T_MINUS: currenValue = val2 - val1; break; 
             case T_MULTIPLY: currenValue = val2 * val1; break; 
             case T_DIVIDE: {
-                if (val1==0){divideByZeroError(1,val2);break;}
-                currenValue = val2 / val1; break;
-
+                    if (val1==0){divideByZeroError(this->lineNumber ,val2);
+                } else {
+                    currenValue = val2 / val1; break;
+                }                 
+                
             }               
             case T_MODULO: currenValue = val2 % val1; break;                 
             case T_EXP: currenValue = pow(val2,val1); break;                 
         }
-        
-        val.push(currenValue);// cout<<"current: "<<currenValue<<"\n";  
-        // if 
-        // cout<<"op length: "<<op.size()<<"\n";
-        // cout<< "val length: " << val.size()<<"\n";
-    // }
+        checkForErrors(currenValue);
+        val.push(currenValue);
 }
 
 void Parser::start() {    

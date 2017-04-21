@@ -39,7 +39,9 @@ class Parser {
     Scanner scanner;
     std::stack<Token> op; 
     std::stack<int> val;
-    bool evaluate;
+    std::string printOut;
+    int lineNumber;
+    bool evaluate; 
     void start();
     void exprList();
     void exprListP();
@@ -56,7 +58,7 @@ class Parser {
     Token findTokenFromChar(char c);
     Token findTokenFromString(std::string s);
     bool isPrecidence(Token, Token);
-    void checkForErrors(int);
+    void checkForErrors(long);
     // You will need to define the recursive descent functions you're going to use here.
     // WRITEME
 public:
