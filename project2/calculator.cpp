@@ -4,8 +4,10 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <string>
 #include <math.h>
+#include <limits>
 
 using namespace std;
 
@@ -14,23 +16,16 @@ using namespace std;
 // Scanner implementation
 // ifstream myfile; 
 // string myfile; 
-bool eatenClean = true; 
-char oldChar; 
-string file; 
+// bool eatenClean = true; 
+// char oldChar; 
 
 // You may have to modify this constructor, although it might not be neccessary.
 Scanner::Scanner() : line(1), 
                      value(0) {
     // WRITEME
-    
-    // if (myfile.is_open()){
-    //     // cout << "succefully opened file\n"; 
-        
-    // }else {
-    //     cout << "Unable to open file"; 
-    //     //TODO -> Throw error
-    // }
 }
+
+
 
 Token Scanner::checkDoubleStar(){
     char first; 
@@ -130,11 +125,12 @@ Token Scanner::findTokenFromChar(char c){
     }
 }
 
+
 // You need to fill this method with the appropriate code for it to work as described in the project description.
 void Scanner::eatToken(Token toConsume) {
     // I am a placeholder. I'm not even fun. Change me into something that can actually consume tokens!
     // WRITEME
-
+    //((2+43)%6+12)/3; (2**3**2+19)%8
     //The eatToken function takes in a 
     //token that the parser expects, 
     //and verifies that it is the same as the 
@@ -144,13 +140,51 @@ void Scanner::eatToken(Token toConsume) {
 
     char c; 
     cin.get(c); 
-    // cout << "eaten: " << c <<"\n" ;   
-// 
+    if (isdigit(c)){
+        // cout << "eaten: "<<this->value << "\n";
+    } else {
+        // cout << "eaten: " << c <<"\n" ;   
+    }
+
     Token found = findTokenFromChar(c);
+    //  switch (found){
+    //     case T_NUMBER: {val.push(this->value); 
+    //         break;
+    //     }
+    //     case T_PLUS : op.push(T_PLUS);  break;
+    //     case T_MINUS : op.push(T_MINUS); break;
+    //     case T_MULTIPLY: op.push(T_MULTIPLY); break;
+    //     case T_DIVIDE : op.push(T_DIVIDE); break;
+    //     case T_MODULO : op.push(T_MODULO); break;
+    //     case T_EXP : op.push(T_EXP); break;
+    //     case T_OPENPAREN : op.push(T_OPENPAREN); break;
+    //     case T_CLOSEPAREN : {
+    //         addTwoOperands();            
+    //         break;
+    //     } //op.push(T_CLOSEPAREN); break;
+    //     case T_SEMICOLON: {
+    //         if (!op.empty()) addTwoOperands(); 
+    //         cout<< val.top(); val.pop();            
+    //         break; 
+    //     }
+    //         //evaluStack(); break;
+    //     // default: cout<<"SJEKK EAT"<<"\n";
+    // } 
+    // cout << "Val:" << val.top() << "\n";
+    // cout << "Op:" << op.top() << "\n";
+
+
+
     if (toConsume != found){
         mismatchError(this->line, toConsume, found);
-    }
-}
+    } else {
+       
+        if (isdigit(c)){
+            result.push_back(to_string(this->value));
+        } else {
+            result.push_back(tokenToString(found));
+        }
+}   }
 
 int Scanner::lineNumber() {
     return this->line;
@@ -161,15 +195,288 @@ int Scanner::getNumberValue() {
 }
 
 // Parser implementation
-
 // You may need to modify this constructor and make it do stuff, although it might not be neccessary.
 Parser::Parser(bool eval) : evaluate(eval) {
     // WRITEME
+    // this->evaluate = eval;
+}
 
+
+Token Parser::findTokenFromString(string s){
+    // cout <<"s: "<< s<< "\n";
+    char c = s[0];
+    switch(c) {
+        case '+' : return T_PLUS;
+        case '-' : return T_MINUS;
+        case '*' : {
+            if (s[1] == '*'){
+                return T_EXP;
+            } else {
+                return T_MULTIPLY;
+            }
+
+        } 
+        case '/' : return T_DIVIDE;
+        case '%' : return T_MODULO;
+        // case '**': return T_EXP; //TODO this will never happend? 
+        case '(' : return T_OPENPAREN;
+        case ')' : return T_CLOSEPAREN;
+        case 'S' : return T_SEMICOLON;
+        case '0' : return T_NUMBER;
+        case '1' : return T_NUMBER;
+        case '2' : return T_NUMBER;
+        case '3' : return T_NUMBER;
+        case '4' : return T_NUMBER;
+        case '5' : return T_NUMBER;
+        case '6' : return T_NUMBER;
+        case '7' : return T_NUMBER;
+        case '8' : return T_NUMBER;
+        case '9' : return T_NUMBER;      
+        case 'N' : return T_NEWLN;      
+          
+    }
 }
 
 void Parser::parse() {
     start();
+    
+    if (this->evaluate){
+        // cout<<"EVAL: \n";
+        // scanner.result.push_back(";"); //TODO Dirtyfix. 
+       for(vector<string>::const_iterator i = scanner.result.begin(); i != scanner.result.end(); ++i) {
+            // cout << *i << "\n";             
+            string currentString = *i;            
+            Token tok = findTokenFromString(currentString);
+           
+
+            // cout << tokenToString(tok)<<"\n";
+                    
+            switch (tok){
+                case T_NUMBER: {
+                        int thisInt = stoi(currentString);
+                        val.push(thisInt);
+                        break;
+                    }
+                case T_PLUS : {
+                    // cout<<"PLUS"<<"\n";
+                    if (!op.empty()){
+                        while (!op.empty() && isPrecidence(tok, op.top())){                            
+                            addTwoOperands();                        
+                        }                         
+                    }                                        
+                    op.push(T_PLUS); 
+                    
+                    break;
+                }
+                case T_MINUS : {
+                    // cout<<"MIN"<<"\n";
+                    if (!op.empty()){ 
+                        while (!op.empty() && isPrecidence(tok, op.top())){                            
+                            addTwoOperands();                        
+                        }                         
+                    }                                     
+                    op.push(T_MINUS); 
+                    break;
+                }
+                case T_MULTIPLY: {
+                    // cout<<"MUL"<<"\n";
+                    if (!op.empty()){
+                        while (!op.empty() && isPrecidence(tok, op.top())){                            
+                            addTwoOperands();                        
+                        }                         
+                    }                     
+                    op.push(T_MULTIPLY); 
+                    break;
+                } 
+                case T_DIVIDE : {
+                    // cout<<"DIV"<<"\n";
+                    if (!op.empty()){
+                        while (!op.empty() && isPrecidence(tok, op.top())){                            
+                            addTwoOperands();                        
+                        }                         
+                    }                     
+                    op.push(T_DIVIDE); 
+                    break;
+                }
+                case T_MODULO : {
+                    // cout<<"MOD"<<"\n";
+                    if (!op.empty()){
+                        while (!op.empty() && isPrecidence(tok, op.top())){                            
+                            addTwoOperands();                        
+                        }                         
+                    }                     
+                    op.push(T_MODULO); 
+                    break;
+                }
+                case T_EXP : {
+                    // cout<<"EXP"<<"\n";
+                    if (!op.empty()){
+                        while (!op.empty() && isPrecidence(tok, op.top())){                            
+                            addTwoOperands();                        
+                        }                         
+                    }                     
+                    op.push(T_EXP); 
+                    break;
+                }
+                case T_OPENPAREN : op.push(T_OPENPAREN); break;
+                case T_CLOSEPAREN : {
+                    while (op.top()!=T_OPENPAREN){addTwoOperands(); }
+                    op.pop();                                        
+                    break;
+                } 
+                case T_SEMICOLON: {                    
+                    // cout<< val.top(); val.pop(); 
+                    // cout<< "semi: " <<op.top();  
+                    // cout<<"op length: "<<op.size()<<"\n";
+                    // cout<< "val length: " << val.size()<<"\n";
+                    while (!op.empty()&&(val.size()>1)){addTwoOperands(); }
+                    if (!val.empty()) {
+                        checkForErrors(val.top());
+                        cout<<val.top()<<"\n"; val.pop();
+                    } 
+                     
+                    while (!op.empty()) op.pop();//TODO ok? 
+                    
+
+                    // cout<<"op length: "<<op.size()<<"\n";
+                    // cout<< "val length: " << val.size()<<"\n";
+                    
+                    break; 
+                }
+                case T_NEWLN: break;
+                default: {
+                   return;                                    
+                }
+            }        
+       }        
+         
+        while (!op.empty()&&(val.size()>1)){addTwoOperands(); }
+        // cout <<"_--";
+        if (!val.empty()) {
+            checkForErrors(val.top());
+            cout<<val.top()<<"\n";   
+        }
+
+       
+  
+        
+    }
+}
+
+
+void Parser::checkForErrors(int in){
+    if (in <= -(std::numeric_limits<int>::max())  || in >= (std::numeric_limits<int>::max())){ 
+
+
+    }
+}
+
+bool Parser::isPrecidence(Token first, Token sec){
+    if (sec == T_CLOSEPAREN || sec == T_OPENPAREN)
+            return false;
+    // cout<<"checking: "<< tokenToString(first)<< " " << tokenToString(sec) << "\n";
+    switch(first){
+        case T_PLUS : {         
+            if (   
+                    // sec == T_PLUS || 
+                    sec == T_MULTIPLY || 
+                    sec == T_DIVIDE || 
+                    sec == T_EXP || 
+                    sec == T_MODULO ){
+                        return true; 
+            } else false; 
+            break; }
+        case T_MINUS: {            
+            if (   
+                    // sec == T_PLUS || 
+                    // sec == T_MINUS || 
+                    sec == T_MULTIPLY || 
+                    sec == T_DIVIDE || 
+                    sec == T_EXP || 
+                    sec == T_MODULO ){
+                        return true; 
+            } else false;
+            break; }
+        case T_MULTIPLY: {
+            if (    
+                    sec == T_PLUS || 
+                    sec == T_MINUS 
+                    // sec == T_DIVIDE || 
+                    // sec == T_EXP || 
+                    // sec == T_MODULO 
+                    ){
+                        return false; 
+            }else true; 
+            break; 
+        }
+        case T_DIVIDE: {
+                if (    
+                    sec == T_PLUS || 
+                    sec == T_MINUS 
+                    // sec == T_DIVIDE || 
+                    // sec == T_EXP || 
+                    // sec == T_MODULO 
+                    ){
+                        return false; 
+            }else true; 
+            break;
+        } 
+        case T_MODULO: {
+                        if (    
+                    sec == T_PLUS || 
+                    sec == T_MINUS 
+                    // sec == T_DIVIDE || 
+                    // sec == T_EXP || 
+                    // sec == T_MODULO ||
+                    ){
+                        return false; 
+            } else true; 
+            break;
+        } 
+        case T_EXP: {
+            if (    
+                    sec == T_PLUS || 
+                    sec == T_MINUS ||
+                    sec == T_MULTIPLY ||
+                    sec == T_DIVIDE || 
+                    sec == T_EXP || 
+                    sec == T_MODULO 
+                    ){
+                        return false; 
+            } else true; 
+            break;
+        } 
+        default: return true ;//TODO DEFAULT? 
+    }
+}
+
+
+void Parser::addTwoOperands(){
+    Token tok = op.top();
+    // while (tok != T_OPENPAREN){
+        op.pop();
+        int val1 = val.top();val.pop();
+        int val2 = val.top();val.pop();
+        long currenValue = 0;            
+        // cout<<"exec" <<tokenToString(tok)<<"\n";
+        switch (tok){
+            case T_PLUS: currenValue = val2 + val1; break; 
+            case T_MINUS: currenValue = val2 - val1; break; 
+            case T_MULTIPLY: currenValue = val2 * val1; break; 
+            case T_DIVIDE: {
+                if (val1==0){divideByZeroError(1,val2);break;}
+                currenValue = val2 / val1; break;
+
+            }               
+            case T_MODULO: currenValue = val2 % val1; break;                 
+            case T_EXP: currenValue = pow(val2,val1); break;                 
+        }
+        
+        val.push(currenValue);// cout<<"current: "<<currenValue<<"\n";  
+        // if 
+        // cout<<"op length: "<<op.size()<<"\n";
+        // cout<< "val length: " << val.size()<<"\n";
+    // }
 }
 
 void Parser::start() {    
