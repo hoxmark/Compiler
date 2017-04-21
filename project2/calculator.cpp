@@ -14,18 +14,10 @@ using namespace std;
 
 
 // Scanner implementation
-// ifstream myfile; 
-// string myfile; 
-// bool eatenClean = true; 
-// char oldChar; 
-
 // You may have to modify this constructor, although it might not be neccessary.
 Scanner::Scanner() : line(1), 
                      value(0) {
-    // WRITEME
 }
-
-
 
 Token Scanner::checkDoubleStar(){
     char first; 
@@ -50,7 +42,6 @@ Token Scanner::checkDoubleStarAfterEaten(char first){
         cin.get(sec);
         return T_EXP;
     } else {
-        //cin.putback(first);
         return T_MULTIPLY;      
     }
 }
@@ -59,13 +50,11 @@ Token Scanner::nextToken() {
     // I am a placeholder. Change me into something that can actually decypher the next token without consuming it.
     // WRITEM
     char c; 
-    // std::cin >> std::ws;
     c = cin.peek(); 
     
     
     int num = 0; 
     if ( c == EOF ) return T_EOF;
-    //  cout<< "nextToken char:"<<c<<"\n";
     if ( isdigit(c)){
         cin >> num; 
         cin.putback(c);        
@@ -77,7 +66,6 @@ Token Scanner::nextToken() {
         case '*' : return checkDoubleStar();
         case '/' : return T_DIVIDE;
         case '%' : return T_MODULO;
-        //case '**': return T_EXP; //TODO this will never happend? 
         case '(' : return T_OPENPAREN;
         case ')' : return T_CLOSEPAREN;
         case ';' : return T_SEMICOLON;
@@ -96,8 +84,6 @@ Token Scanner::nextToken() {
         default : scanError(this->line, c); 
     }
 }
-
-
 
 Token Scanner::findTokenFromChar(char c){
     switch(c) {
@@ -124,25 +110,14 @@ Token Scanner::findTokenFromChar(char c){
     }
 }
 
-
 // You need to fill this method with the appropriate code for it to work as described in the project description.
 void Scanner::eatToken(Token toConsume) {
     // I am a placeholder. I'm not even fun. Change me into something that can actually consume tokens!
     // WRITEME
-    //The eatToken function takes in a 
-    //token that the parser expects, 
-    //and verifies that it is the same as the 
-    //next token available before consuming it and 
-    //removing it from the input stream.
-    //Skal denne eates eller ikke
+    //The eatToken function takes in a token that the parser expects, and verifies that it is the same as the next token available before consuming it and removing it from the input stream.
 
     char c; 
     cin.get(c); 
-    if (isdigit(c)){
-        // cout << "eaten: "<<this->value << "\n";
-    } else {
-        // cout << "eaten: " << c <<"\n" ;   
-    }
 
     Token found = findTokenFromChar(c);
 
@@ -168,14 +143,11 @@ int Scanner::getNumberValue() {
 // Parser implementation
 // You may need to modify this constructor and make it do stuff, although it might not be neccessary.
 Parser::Parser(bool eval) : evaluate(eval) {
-    // WRITEME
-    // this->evaluate = eval;
     this->lineNumber = 1;
 }
 
 
 Token Parser::findTokenFromString(string s){
-    // cout <<"s: "<< s<< "\n";
     char c = s[0];
     switch(c) {
         case '+' : return T_PLUS;
@@ -190,7 +162,6 @@ Token Parser::findTokenFromString(string s){
         } 
         case '/' : return T_DIVIDE;
         case '%' : return T_MODULO;
-        // case '**': return T_EXP; //TODO this will never happend? 
         case '(' : return T_OPENPAREN;
         case ')' : return T_CLOSEPAREN;
         case 'S' : return T_SEMICOLON;
@@ -212,14 +183,10 @@ Token Parser::findTokenFromString(string s){
 void Parser::parse() {
     start();
     
-    if (this->evaluate){
-        // cout<<"EVAL: \n";
-        // scanner.result.push_back(";"); //TODO Dirtyfix. 
+    if (this->evaluate){        
        for(vector<string>::const_iterator i = scanner.result.begin(); i != scanner.result.end(); ++i) {
-            // cout << *i << "\n";             
             string currentString = *i;            
             Token tok = findTokenFromString(currentString);        
-            // cout << tokenToString(tok)<<"\n";                    
             switch (tok){
                 case T_NUMBER: {
                         int thisInt = stoi(currentString);
@@ -227,7 +194,6 @@ void Parser::parse() {
                         break;
                     }
                 case T_PLUS : {
-                    // cout<<"PLUS"<<"\n";
                     if (!op.empty()){
                         while (!op.empty() && isPrecidence(tok, op.top())){                            
                             addTwoOperands();                        
@@ -238,7 +204,6 @@ void Parser::parse() {
                     break;
                 }
                 case T_MINUS : {
-                    // cout<<"MIN"<<"\n";
                     if (!op.empty()){ 
                         while (!op.empty() && isPrecidence(tok, op.top())){                            
                             addTwoOperands();                        
@@ -248,7 +213,6 @@ void Parser::parse() {
                     break;
                 }
                 case T_MULTIPLY: {
-                    // cout<<"MUL"<<"\n";
                     if (!op.empty()){
                         while (!op.empty() && isPrecidence(tok, op.top())){                            
                             addTwoOperands();                        
@@ -258,7 +222,6 @@ void Parser::parse() {
                     break;
                 } 
                 case T_DIVIDE : {
-                    // cout<<"DIV"<<"\n";
                     if (!op.empty()){
                         while (!op.empty() && isPrecidence(tok, op.top())){                            
                             addTwoOperands();                        
@@ -268,7 +231,6 @@ void Parser::parse() {
                     break;
                 }
                 case T_MODULO : {
-                    // cout<<"MOD"<<"\n";
                     if (!op.empty()){
                         while (!op.empty() && isPrecidence(tok, op.top())){                            
                             addTwoOperands();                        
@@ -278,7 +240,6 @@ void Parser::parse() {
                     break;
                 }
                 case T_EXP : {
-                    // cout<<"EXP"<<"\n";
                     if (!op.empty()){
                         while (!op.empty() && isPrecidence(tok, op.top())){                            
                             addTwoOperands();                        
@@ -302,7 +263,7 @@ void Parser::parse() {
                         val.pop();
                     } 
                      
-                    while (!op.empty()) op.pop();//TODO ok?                                                     
+                    while (!op.empty()) op.pop();                                                   
                     break; 
                 }
                 case T_NEWLN: this->lineNumber = this->lineNumber+ 1; break;
@@ -322,11 +283,9 @@ void Parser::parse() {
 }
 
 
-
 void Parser::checkForErrors(long in){
     if (in <= -(std::numeric_limits<int>::max())  || in >= (std::numeric_limits<int>::max())){ 
         outOfBoundsError((this->lineNumber), in);
-
     }
 }
 
@@ -335,88 +294,60 @@ bool Parser::isPrecidence(Token first, Token sec){
             return false;
     switch(first){
         case T_PLUS : {         
-            if (   
-                    // sec == T_PLUS || 
-                    sec == T_MULTIPLY || 
-                    sec == T_DIVIDE || 
-                    sec == T_EXP || 
-                    sec == T_MODULO ){
-                        return true; 
+            if (sec == T_MULTIPLY || 
+                sec == T_DIVIDE || 
+                sec == T_EXP || 
+                sec == T_MODULO ){
+                    return true; 
             }  
-            break; }
-        case T_MINUS: {            
-            if (   
-                    // sec == T_PLUS || 
-                    // sec == T_MINUS || 
-                    sec == T_MULTIPLY || 
-                    sec == T_DIVIDE || 
-                    sec == T_EXP || 
-                    sec == T_MODULO ){
-                        return true; 
-            } 
-            break; }
-        case T_MULTIPLY: {
-            if (    
-                    sec == T_PLUS || 
-                    sec == T_MINUS 
-                    // sec == T_DIVIDE || 
-                    // sec == T_EXP || 
-                    // sec == T_MODULO 
-                    ){
-                        return false; 
-            } 
             break; 
         }
+        case T_MINUS: {            
+            if (sec == T_MULTIPLY || 
+                sec == T_DIVIDE || 
+                sec == T_EXP || 
+                sec == T_MODULO){
+                    return true; 
+            }break; 
+        }
+        case T_MULTIPLY: {
+            if (sec == T_PLUS || 
+                sec == T_MINUS){
+                 return false; 
+            }break; 
+        }
         case T_DIVIDE: {
-                if (    
-                    sec == T_PLUS || 
-                    sec == T_MINUS 
-                    // sec == T_DIVIDE || 
-                    // sec == T_EXP || 
-                    // sec == T_MODULO 
-                    ){
-                        return false; 
-            } 
-            break;
+            if (sec == T_PLUS || 
+                sec == T_MINUS){
+                return false; 
+            }break;
         } 
         case T_MODULO: {
-                        if (    
-                    sec == T_PLUS || 
-                    sec == T_MINUS 
-                    // sec == T_DIVIDE || 
-                    // sec == T_EXP || 
-                    // sec == T_MODULO ||
-                    ){
-                        return false; 
-            } 
-            break;
+            if (sec == T_PLUS || 
+                sec == T_MINUS){
+                    return false; 
+            }break;
         } 
         case T_EXP: {
-            if (    
-                    sec == T_PLUS || 
-                    sec == T_MINUS ||
-                    sec == T_MULTIPLY ||
-                    sec == T_DIVIDE || 
-                    sec == T_EXP || 
-                    sec == T_MODULO 
-                    ){
-                        return false; 
-            }  
-            break;
+            if (sec == T_PLUS || 
+                sec == T_MINUS ||
+                sec == T_MULTIPLY ||
+                sec == T_DIVIDE || 
+                sec == T_EXP || 
+                sec == T_MODULO){
+                return false; 
+            }break;
         } 
-        default: return true ;//TODO DEFAULT? 
+        default: return true ;
     }
 }
 
-
 void Parser::addTwoOperands(){
     Token tok = op.top();
-    // while (tok != T_OPENPAREN){
         op.pop();
         int val1 = val.top();val.pop();
         int val2 = val.top();val.pop();
         long currenValue = 0;            
-        // cout<<"exec" <<tokenToString(tok)<<"\n";
         switch (tok){
             case T_PLUS: currenValue = val2 + val1; break; 
             case T_MINUS: currenValue = val2 - val1; break; 
@@ -436,12 +367,10 @@ void Parser::addTwoOperands(){
 }
 
 void Parser::start() {    
-    // scanner.eatToken(T_EOF);
     // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
     // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
     // or less steps in the process.
     //
-    // WRITEME
     exprList(); 
 }
 
@@ -455,8 +384,6 @@ void Parser::exprListP(){
         case T_SEMICOLON:{
           scanner.eatToken(T_SEMICOLON);     
           exprList();      
-        //   expr();
-        //   exprListP();  
         } 
         default: return; 
     }
@@ -482,7 +409,6 @@ void Parser::term(){
 }
 
 void Parser::termP(){
-    // cout<< "termP: "<< "\n";
     switch(scanner.nextToken()){
         case T_MULTIPLY: scanner.eatToken(T_MULTIPLY); expp(); termP(); break;
         case T_DIVIDE: scanner.eatToken(T_DIVIDE); expp(); termP(); break;
@@ -505,7 +431,6 @@ void Parser::exppP(){
 }
 
 void Parser::factor(){
-    // cout<< "factor: " <<tokenToString(scanner.nextToken())<<"\n";
     switch(scanner.nextToken()){        
         case T_NUMBER: scanner.eatToken(T_NUMBER); break; 
         case T_OPENPAREN: scanner.eatToken(T_OPENPAREN); expr(); scanner.eatToken(T_CLOSEPAREN); break;
