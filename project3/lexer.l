@@ -48,48 +48,49 @@ DIGIT    [0-9]
 
 
 [ \t\n]+                /* eat up whitespace */
-"print"                {return T_PRINT;}
-"return"               {return T_RETURN;}
-"if"                   {return T_IF;}
-"else"                 {return T_ELSE;}
-"while"                {return T_WHILE;}
-"new"                  {return T_NEW;}
-"integer"              {return T_INTEGER;}
-"boolean"              {return T_BOOLEAN;}
-"none"                 {return T_NONE;}
-"equals"               {return T_EQUALS;}
-"and"                  {return T_AND;}
-"or"                   {return T_OR;}
-"not"                  {return T_NOT;}
-"true"                 {return T_TRUE;}
-"false"                {return T_FALSE;}
-"extends"              {return T_EXTENDS;}
-"repeat"               {return T_REPEAT;}
-"until"                {return T_UNTIL;}
+"print"                {printOut("print");return T_PRINT;}
+"return"               {printOut("return"); return T_RETURN;}
+"if"                   {printOut("if"); return T_IF;}
+"else"                 {printOut("else"); return T_ELSE;}
+"while"                {printOut("while"); return T_WHILE;}
+"new"                  {printOut("new"); return T_NEW;}
+"integer"              {printOut("integer"); return T_INTEGER;}
+"boolean"              {printOut("boolean"); return T_BOOLEAN;}
+"none"                 {printOut("none"); return T_NONE;}
+"equals"               {printOut("equals"); return T_EQUALS;}
+"and"                  {printOut("and"); return T_AND;}
+"or"                   {printOut("or"); return T_OR;}
+"not"                  {printOut("not"); return T_NOT;}
+"true"                 {printOut("true"); return T_TRUE;}
+"false"                {printOut("false"); return T_FALSE;}
+"extends"              {printOut("extends"); return T_EXTENDS;}
+"repeat"               {printOut("repeat"); return T_REPEAT;}
+"until"                {printOut("until"); return T_UNTIL;}
 
-"{"                    {return T_LC;}
-"}"                    {return T_RC;}
-"("                    {return T_LP;}
-")"                    {return T_RP;}
+"{"                    {printOut("{"); return T_LC;}
+"}"                    {printOut("}"); return T_RC;}
+"("                    {printOut("("); return T_LP;}
+")"                    {printOut(")"); return T_RP;}
 
-"+"                    {return T_PLUS;}
-"/"                    {return T_DIVIDE;}
-"-"                    {return T_MINUS;}
-"*"                    {return T_MULTIPLY;}
-"."                    {return T_DOT;}
-"!"                    {return T_NOT;}
-";"                    {return T_SEMICOL;}
-"->"                   { return T_FUNC;}
-":"                    { return T_COLON;}
-","                    { return T_COMMA;}
-"="                    { return T_EQUALS;}
-"<"                    { return T_LESS;}
-"<="                   { return T_LESSOREQUAL;}
+"+"                    {printOut("+"); return T_PLUS;}
+"/"                    {printOut("/"); return T_DIVIDE;}
+"-"                    {printOut("-"); return T_MINUS;}
+"*"                    {printOut("*"); return T_MULTIPLY;}
+"."                    {printOut("."); return T_DOT;}
+"!"                    {printOut("!"); return T_NOT;}
+";"                    {printOut(";"); return T_SEMICOL;}
+"->"                   {printOut("->" ); return T_FUNC;}
+":"                    {printOut(":" ); return T_COLON;}
+","                    {printOut("," ); return T_COMMA;}
+"="                    {printOut("=" ); return T_EQUALS;}
+
+"<"                    {printOut("<" ); return T_LESS;}
+"<="                   {printOut("<=" ); return T_LESSOREQUAL;}
 
 
-[a-zA-Z][a-zA-Z0-9]*  { yylval.sval = strdup(yytext); return T_ID; } 
+[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.sval = strdup(yytext); return T_ID; } 
 
-[1-9][0-9]*|0         { yylval.ival = atoi(yytext); return T_LITERAL;}
+[1-9][0-9]*|0         {printOut("ITERAL:"); yylval.ival = atoi(yytext); return T_LITERAL;}
 
                     
 

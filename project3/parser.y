@@ -3,6 +3,8 @@
     #include <cstdio>
     #include <iostream>
     #include <cstdio>
+    #include <vector>
+    #include <string>
 
 
     #define YYDEBUG 1
@@ -12,6 +14,7 @@
     void yyerror(const char *);
     void printOut(const char *);
     
+    vector<string> a;
 %}
 
 %error-verbose
@@ -69,13 +72,15 @@ Start: Classes
     ;
 
 Classes: Classes Class                
-        | Class               
+        | Class                       
         ;
 
-Class: T_ID T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
-        | T_ID T_EXTENDS T_ID T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
+Class:  ClassId T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
+        | ClassId T_EXTENDS T_ID T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
         ;
 
+ClassId: T_ID   {a.push_back($1); printOut($1);} 
+        ;
 
 Zero_Or_More_Members: Zero_Or_More_Members Member
         |
@@ -85,7 +90,8 @@ Member: Type T_ID T_SEMICOL
         ;
 
 Type: T_INTEGER
-        | T_BOOLEAN
+        | T_BOOLEAN  
+        | T_NONE              
         ;
 
 Zero_Or_More_Methods: Zero_Or_More_Methods Method
@@ -160,7 +166,7 @@ Print: T_PRINT Expression T_SEMICOL
         ;
 
 Expression: Expression T_PLUS Expression   
-        |Expression T_MULTIPLY Expression  
+        |Expression T_MINUS Expression  
         |Expression T_MULTIPLY Expression 
         |Expression T_DIVIDE Expression 
         |Expression T_LESS Expression 
