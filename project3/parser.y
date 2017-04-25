@@ -65,10 +65,10 @@
 
 %%
 
-Start: Classes                       {cout << "Start"<<endl;}
+Start: Classes                       
     ;
 
-Classes: Classes Class                   
+Classes: Classes Class                
         | Class               
         ;
 
@@ -92,36 +92,43 @@ Zero_Or_More_Methods: Zero_Or_More_Methods Method
         |
         ;
 
-Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC Body T_RC
+Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC Body T_RC  {printOut("METHOD \n");}
         ; 
  
 
-Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter
+Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {printOut("Zero or More Para \n");}
         |
         ;
 
-Parameter: T_ID T_COLON Type
-        | T_ID T_COLON Type T_COMMA Parameter
+Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
+        | T_ID T_COLON Type T_COMMA Parameter       {printOut("Parameter2 \n");}
         ; 
   
-Body: Zero_Or_More_Declarations Statements ReturnStatement
+Body: Zero_Or_More_Declarations Zero_Or_More_Statements ReturnStatement {printOut("BODY \n");}
         | 
         ; 
 
-Zero_Or_More_Declarations: Zero_Or_More_Declarations Declaration
+Zero_Or_More_Declarations: Zero_Or_More_Declarations Declaration {printOut("DEC 0\n");}
         |
         ;
 
-Declaration: Type T_ID T_SEMICOL
-        | T_COMMA Type T_ID
-        | Type T_ID Declaration T_SEMICOL
+Declaration: Type IDS T_SEMICOL  {printOut("DEC 1\n");}
         ;
+
+IDS:  T_ID
+        | IDS T_COMMA T_ID
+        ;
+
 
 ReturnStatement: T_RETURN Expression T_SEMICOL
         |
         ; 
 
-Statements: Assignment
+Zero_Or_More_Statements: Zero_Or_More_Statements Statement
+        |
+        ; 
+
+Statement: Assignment
         |MethodCalling
         |Expression
         |IfElse
@@ -130,8 +137,7 @@ Statements: Assignment
         |Print
         ;
 
-
-Assignment: T_ID T_EQUALS Expression T_SEMICOL
+Assignment: T_ID T_EQUALS Expression T_SEMICOL {printOut("ASSIGNMENT OK  1");}
         | T_ID T_DOT T_ID T_EQUALS Expression T_SEMICOL
         ;
 
@@ -148,7 +154,7 @@ WhileLoop: T_WHILE T_LP Expression T_RP T_LC Block T_RC
 RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL
         ;
 
-Block: Statements
+Block: Zero_Or_More_Statements
         ;
 Print: T_PRINT Expression T_SEMICOL
         ;
@@ -168,7 +174,7 @@ Expression: Expression T_PLUS Expression
         |T_ID T_DOT T_ID 
         |MethodCall 
         |T_LP Expression T_RP 
-        |T_INTEGER T_LITERAL  
+        |T_LITERAL  
         |T_TRUE 
         |T_FALSE 
         |T_NEW T_ID 
