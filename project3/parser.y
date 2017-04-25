@@ -65,52 +65,56 @@
 
 %%
 
-Class: T_ID T_LC Members Methods T_RC 
-        | T_ID T_EXTENDS T_ID T_LC Members Methods T_RC 
+Start: Classes                       {cout << "Start"<<endl;}
+    ;
+
+Classes: Classes Class                   
+        | Class               
         ;
 
-Members: MembersP
+Class: T_ID T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
+        | T_ID T_EXTENDS T_ID T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
+        ;
+
+
+Zero_Or_More_Members: Zero_Or_More_Members Member
         |
         ;
 
-MembersP: Members
-        | Type T_ID T_SEMICOL
+Member: Type T_ID T_SEMICOL
         ;
 
 Type: T_INTEGER
         | T_BOOLEAN
         ;
 
-Methods: MethodsP
+Zero_Or_More_Methods: Zero_Or_More_Methods Method
         |
         ;
 
-MethodsP: Methods
-        | T_ID T_LP Parameters T_RP T_FUNC Type T_LC Body T_RC
+Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC Body T_RC
         ; 
-
  
-Parameters: ParametersP
+
+Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter
         |
         ;
 
-ParametersP: Parameters
-        | T_ID T_COLON Type
-        | T_ID T_COLON Type T_COMMA ParametersP
+Parameter: T_ID T_COLON Type
+        | T_ID T_COLON Type T_COMMA Parameter
         ; 
   
-Body: Declarations Statements ReturnStatement
+Body: Zero_Or_More_Declarations Statements ReturnStatement
         | 
         ; 
 
-Declarations: DeclarationsP
+Zero_Or_More_Declarations: Zero_Or_More_Declarations Declaration
         |
         ;
 
-DeclarationsP: Declarations
-        | Type T_ID T_SEMICOL
+Declaration: Type T_ID T_SEMICOL
         | T_COMMA Type T_ID
-        | Type T_ID DeclarationsP T_SEMICOL
+        | Type T_ID Declaration T_SEMICOL
         ;
 
 ReturnStatement: T_RETURN Expression T_SEMICOL
