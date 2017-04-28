@@ -5,6 +5,7 @@
     #include <cstdio>
     #include <vector>
     #include <string>
+    #include <map>
 
 
     #define YYDEBUG 1
@@ -20,7 +21,7 @@
 %error-verbose
 
 
-/* List all your tokens here */
+/* List all your tokens here */ 
 %token T_PRINT T_RETURN
 %token T_IF
 %token T_ELSE
@@ -38,7 +39,6 @@
 %token T_EXTENDS
 %token T_REPEAT
 %token T_UNTIL
-%token <sval> T_ID
 %token T_EOF
 %token T_NEWLN
 %token T_LC
@@ -55,13 +55,14 @@
 %token T_SEMICOL
 %token T_FUNC
 %token T_COLON
+%token <sval> T_ID
 
 %union {
 	int ival;
 	char *sval;
 }
 
-
+%left T_FUNC
 %left T_PLUS T_MINUS
 %left T_DIVIDE T_MULTIPLY
 %right T_NOT U_MINUS
@@ -75,9 +76,14 @@ Classes: Classes Class
         | Class                       
         ;
 
-Class:  ClassId T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
-        | ClassId T_EXTENDS T_ID T_LC Zero_Or_More_Members Zero_Or_More_Methods T_RC 
+Class:  ClassId T_LC MethodsAndMembers T_RC 
+        | ClassId T_EXTENDS T_ID T_LC MethodsAndMembers T_RC 
         ;
+
+MethodsAndMembers: MethodsAndMembers Member  
+        | MethodsAndMembers Method
+        |
+        ; 
 
 ClassId: T_ID   {a.push_back($1); printOut($1);} 
         ;
@@ -89,9 +95,10 @@ Zero_Or_More_Members: Zero_Or_More_Members Member
 Member: Type T_ID T_SEMICOL
         ;
 
-Type: T_INTEGER
-        | T_BOOLEAN  
-        | T_NONE              
+Type: T_INTEGER                 {printOut("Type Inte");}
+        | T_BOOLEAN             {printOut("Type bool");}
+        | T_NONE                {printOut("Type None");}
+        | T_ID                  {printOut("Type T_ID");}
         ;
 
 Zero_Or_More_Methods: Zero_Or_More_Methods Method
@@ -110,9 +117,14 @@ Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
         | T_ID T_COLON Type T_COMMA Parameter       {printOut("Parameter2 \n");}
         ; 
   
-Body: Zero_Or_More_Declarations Zero_Or_More_Statements ReturnStatement {printOut("BODY \n");}
+Body: BodyDecStat ReturnStatement {printOut("BODY \n");}
         | 
         ; 
+
+BodyDecStat:BodyDecStat Declaration 
+        |BodyDecStat Statement
+        |
+        ;
 
 Zero_Or_More_Declarations: Zero_Or_More_Declarations Declaration {printOut("DEC 0\n");}
         |
@@ -154,7 +166,7 @@ IfElse: T_IF Expression T_LC Block T_RC
         | T_IF Expression T_LC Block T_RC T_ELSE T_LC Block T_RC
         ;
 
-WhileLoop: T_WHILE T_LP Expression T_RP T_LC Block T_RC
+WhileLoop: T_WHILE Expression T_LC Block T_RC
         ;
 
 RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL
@@ -198,8 +210,6 @@ ArgumentsP: Arguments T_COMMA Expression
         | Expression
         ;
 
-/* WRITME: Write your Bison grammar specification here */
-
 
 %%
 
@@ -211,7 +221,7 @@ void yyerror(const char *s) {
 }
 
 void printOut(const char *s) {
-  fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
+//   fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
 }
 
 

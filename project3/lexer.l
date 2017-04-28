@@ -87,14 +87,9 @@ DIGIT    [0-9]
 "<"                    {printOut("<" ); return T_LESS;}
 "<="                   {printOut("<=" ); return T_LESSOREQUAL;}
 
-
-[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.sval = strdup(yytext); return T_ID; } 
-
 [1-9][0-9]*|0         {printOut("ITERAL:"); yylval.ival = atoi(yytext); return T_LITERAL;}
 
-                    
-
-
+[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.sval = strdup(yytext); return T_ID; }                     
 
 .                   {yyerror("invalid character"); } 
 

@@ -360,7 +360,8 @@ void Parser::addTwoOperands(){
                 
             }               
             case T_MODULO: currenValue = val2 % val1; break;                 
-            case T_EXP: currenValue = pow(val2,val1); break;                 
+            case T_EXP: currenValue = pow(val2,val1); break;   
+                           
         }
         checkForErrors(currenValue);
         val.push(currenValue);
@@ -370,7 +371,6 @@ void Parser::start() {
     // I am a placeholder. Implement a recursive descent parser starting from me. Add other methods for different recursive steps.
     // Depending on how you designed your grammar, how many levels of operator precedence you need, etc., you might end up with more
     // or less steps in the process.
-    //
     exprList(); 
 }
 
@@ -438,3 +438,4 @@ void Parser::factor(){
         default: parseError(scanner.lineNumber(), scanner.nextToken());       
     }
 }
+//DONE 
