@@ -1,0 +1,10 @@
+c0 {
+    boolean m0;
+    boolean a;
+    f0(a0 : integer, a1 : integer) -> integer {
+        return 213;
+        repeat {
+          print 9;
+        } until (true);
+        }
+    }
