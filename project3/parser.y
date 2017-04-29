@@ -24,6 +24,7 @@
 /* List all your tokens here */ 
 %token T_PRINT T_RETURN
 %token T_IF
+%token T_UNARYMINUS
 %token T_ELSE
 %token T_WHILE
 %token T_NEW
@@ -46,7 +47,6 @@
 %token T_LP
 %token T_RP
 %token T_PLUS T_MINUS  
-%token T_UNARYMINUS  
 %token T_DIVIDE T_MULTIPLY
 %token T_LESS
 %token T_LESSOREQUAL
@@ -57,6 +57,7 @@
 %token T_FUNC
 %token T_COLON
 %token <sval> T_ID
+%token T_ASSIGN
 
 %union {
 	int ival;
@@ -83,10 +84,19 @@ Class:  T_ID T_LC MethodsAndMembers T_RC
         | T_ID T_EXTENDS T_ID T_LC MethodsAndMembers T_RC 
         ;
 
-MethodsAndMembers: MethodsAndMembers Member  
-        | MethodsAndMembers Method
+MethodsAndMembers: One_Or_More_Members
+        | One_Or_More_Methods
+        | One_Or_More_Members One_Or_More_Methods
         | %empty
         ; 
+
+One_Or_More_Members: One_Or_More_Members Member 
+        | Member
+        ;
+
+One_Or_More_Methods: One_Or_More_Methods Method 
+        | Method
+        ;
 
 Member: Type T_ID T_SEMICOL
         ;
@@ -109,18 +119,22 @@ Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
         | T_ID T_COLON Type T_COMMA Parameter       {printOut("Parameter2 \n");}
         ; 
   
-BodyDecStat: BodyDecStat Declaration 
-        | BodyDecStat Statement
+BodyDecStat: One_Or_More_Declarations 
+        | One_Or_More_Statements
+        | One_Or_More_Declarations One_Or_More_Statements
         | %empty
         ;
 
-Declaration: Type IDS T_SEMICOL  {printOut("DEC 1\n");}
+ One_Or_More_Declarations: One_Or_More_Declarations Declaration 
+        | Declaration
+        ;
+
+Declaration: Type IDS T_SEMICOL  
         ;
 
 IDS:  T_ID
         | IDS T_COMMA T_ID
         ;
-
 
 ReturnStatement: T_RETURN Expression T_SEMICOL
         |%empty
@@ -130,17 +144,16 @@ One_Or_More_Statements: One_Or_More_Statements Statement
         | Statement
         ;
 
-Statement: Assignment
+Statement:Assignment
         |MethodCalling
-        |Expression
         |IfElse
         |WhileLoop
         |RepeatUntil
         |Print
         ;
 
-Assignment: T_ID T_EQUALS Expression T_SEMICOL {printOut("ASSIGNMENT OK  1");}
-        | T_ID T_DOT T_ID T_EQUALS Expression T_SEMICOL
+Assignment: T_ID T_ASSIGN Expression T_SEMICOL {printOut("ASSIGNMENT OK  1");}
+        | T_ID T_DOT T_ID T_ASSIGN Expression T_SEMICOL
         ;
 
 MethodCalling: MethodCall T_SEMICOL
@@ -170,8 +183,8 @@ Expression: Expression T_PLUS Expression
         |Expression T_EQUALS Expression 
         |Expression T_AND Expression 
         |Expression T_OR Expression 
-        |T_NOT Expression %prec T_NOT
-        |T_UNARYMINUS Expression %prec T_UNARYMINUS
+        |T_NOT Expression 
+        |T_MINUS Expression %prec T_UNARYMINUS
         |T_ID 
         |T_ID T_DOT T_ID 
         |MethodCall 
@@ -187,7 +200,7 @@ MethodCall: T_ID T_LP Arguments T_RP
         | T_ID T_DOT T_ID T_LP Arguments T_RP
         ;
 Arguments: ArgumentsP
-        |%empty
+        | %empty
         ;
 
 ArgumentsP: Arguments T_COMMA Expression

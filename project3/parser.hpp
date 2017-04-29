@@ -71,18 +71,19 @@ extern int yydebug;
     T_RP = 281,
     T_PLUS = 282,
     T_MINUS = 283,
-    T_UNARYMINUS = 284,
-    T_DIVIDE = 285,
-    T_MULTIPLY = 286,
-    T_LESS = 287,
-    T_LESSOREQUAL = 288,
-    T_COMMA = 289,
-    T_LITERAL = 290,
-    T_DOT = 291,
-    T_SEMICOL = 292,
-    T_FUNC = 293,
-    T_COLON = 294,
-    T_ID = 295
+    T_DIVIDE = 284,
+    T_MULTIPLY = 285,
+    T_LESS = 286,
+    T_LESSOREQUAL = 287,
+    T_COMMA = 288,
+    T_LITERAL = 289,
+    T_DOT = 290,
+    T_SEMICOL = 291,
+    T_FUNC = 292,
+    T_COLON = 293,
+    T_ID = 294,
+    T_ASSIGN = 295,
+    T_UNARYMINUS = 296
   };
 #endif
 
@@ -96,7 +97,7 @@ union YYSTYPE
 	int ival;
 	char *sval;
 
-#line 100 "parser.hpp" /* yacc.c:1909  */
+#line 101 "parser.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

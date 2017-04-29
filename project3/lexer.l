@@ -68,22 +68,18 @@
 "}"                    {printOut("}"); return T_RC;}
 "("                    {printOut("("); return T_LP;}
 ")"                    {printOut(")"); return T_RP;}
-
 "+"                    {printOut("+"); return T_PLUS;}
 "/"                    {printOut("/"); return T_DIVIDE;}
-"- "                    {printOut("-"); return T_MINUS;}
+"-"                    {printOut("-"); return T_MINUS;}
 "*"                    {printOut("*"); return T_MULTIPLY;}
 "."                    {printOut("."); return T_DOT;}
-"!"                    {printOut("!"); return T_NOT;}
 ";"                    {printOut(";"); return T_SEMICOL;}
 "->"                   {printOut("->" ); return T_FUNC;}
 ":"                    {printOut(":" ); return T_COLON;}
 ","                    {printOut("," ); return T_COMMA;}
-"="                    {printOut("=" ); return T_EQUALS;}
-
+"="                    {printOut("=" ); return T_ASSIGN;}
 "<"                    {printOut("<" ); return T_LESS;}
 "<="                   {printOut("<=" ); return T_LESSOREQUAL;}
-"-"                    {printOut("UNARY -" ); return T_UNARYMINUS;}
 
                       
 [1-9][0-9]*|0         {printOut("ITERAL:"); yylval.ival = atoi(yytext); return T_LITERAL;}
