@@ -83,14 +83,15 @@ Class:  ClassId T_LC MethodsAndMembers T_RC
 
 MethodsAndMembers: MethodsAndMembers Member  
         | MethodsAndMembers Method
-        |
+        | Zero_Or_More_Members Zero_Or_More_Methods
+        | %empty
         ; 
 
 ClassId: T_ID    
         ;
 
 Zero_Or_More_Members: Zero_Or_More_Members Member
-        |
+        | %empty
         ;
 
 Member: Type T_ID T_SEMICOL
@@ -103,7 +104,7 @@ Type: T_INTEGER                 {printOut("Type Inte");}
         ;
 
 Zero_Or_More_Methods: Zero_Or_More_Methods Method
-        |
+        |%empty
         ;
 
 Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC Body T_RC  {printOut("METHOD \n");}
@@ -111,7 +112,7 @@ Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC Body T_RC  {prin
  
 
 Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {printOut("Zero or More Para \n");}
-        |
+        |%empty
         ;
 
 Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
@@ -119,16 +120,12 @@ Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
         ; 
   
 Body: BodyDecStat ReturnStatement {printOut("BODY \n");}
-        | 
+        | %empty
         ; 
 
 BodyDecStat:BodyDecStat Declaration 
         |BodyDecStat Statement
-        |
-        ;
-
-Zero_Or_More_Declarations: Zero_Or_More_Declarations Declaration {printOut("DEC 0\n");}
-        |
+        | %empty
         ;
 
 Declaration: Type IDS T_SEMICOL  {printOut("DEC 1\n");}
@@ -140,17 +137,12 @@ IDS:  T_ID
 
 
 ReturnStatement: T_RETURN Expression T_SEMICOL
-        |
+        |%empty
         ; 
 
 One_Or_More_Statements: One_Or_More_Statements Statement 
         | Statement
         ;
-
-
-Zero_Or_More_Statements: Zero_Or_More_Statements Statement
-        |
-        ; 
 
 Statement: Assignment
         |MethodCalling
@@ -209,7 +201,7 @@ MethodCall: T_ID T_LP Arguments T_RP
         | T_ID T_DOT T_ID T_LP Arguments T_RP
         ;
 Arguments: ArgumentsP
-        |
+        |%empty
         ;
 
 ArgumentsP: Arguments T_COMMA Expression
