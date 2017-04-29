@@ -40,9 +40,9 @@
 
 <COMMENT>[^*\n]*        /* Taken from the given documentation. eat anything that's not a '*' */
 <COMMENT>"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
-<COMMENT>\n             {++yylineno;}
+<COMMENT>\n             
 <COMMENT>"*"+"/"        BEGIN(INITIAL);
-
+<COMMENT><<EOF>>       {yyerror("EOF in Comment");}
 
 [ \t\n]+                /* eat up whitespace */
 "print"                {printOut("print");return T_PRINT;}

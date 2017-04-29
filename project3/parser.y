@@ -86,7 +86,7 @@ MethodsAndMembers: MethodsAndMembers Member
         |
         ; 
 
-ClassId: T_ID   {a.push_back($1); printOut($1);} 
+ClassId: T_ID    
         ;
 
 Zero_Or_More_Members: Zero_Or_More_Members Member
