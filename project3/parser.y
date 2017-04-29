@@ -63,10 +63,12 @@
 	char *sval;
 }
 
+%left T_OR 
+%left T_AND
+%left T_LESS T_LESSOREQUAL T_EQUALS
 %left T_PLUS T_MINUS
 %left T_DIVIDE T_MULTIPLY
 %right T_NOT T_UNARYMINUS
-
 
 %%
 
@@ -77,22 +79,14 @@ Classes: Classes Class
         | Class                       
         ;
 
-Class:  ClassId T_LC MethodsAndMembers T_RC 
-        | ClassId T_EXTENDS T_ID T_LC MethodsAndMembers T_RC 
+Class:  T_ID T_LC MethodsAndMembers T_RC 
+        | T_ID T_EXTENDS T_ID T_LC MethodsAndMembers T_RC 
         ;
 
 MethodsAndMembers: MethodsAndMembers Member  
         | MethodsAndMembers Method
-        | Zero_Or_More_Members Zero_Or_More_Methods
         | %empty
         ; 
-
-ClassId: T_ID    
-        ;
-
-Zero_Or_More_Members: Zero_Or_More_Members Member
-        | %empty
-        ;
 
 Member: Type T_ID T_SEMICOL
         ;
@@ -103,28 +97,20 @@ Type: T_INTEGER                 {printOut("Type Inte");}
         | T_ID                  {printOut("Type T_ID");}
         ;
 
-Zero_Or_More_Methods: Zero_Or_More_Methods Method
-        |%empty
-        ;
-
-Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC Body T_RC  {printOut("METHOD \n");}
+Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat ReturnStatement T_RC  {printOut("METHOD \n");}
         ; 
  
 
 Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {printOut("Zero or More Para \n");}
-        |%empty
+        | %empty
         ;
 
 Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
         | T_ID T_COLON Type T_COMMA Parameter       {printOut("Parameter2 \n");}
         ; 
   
-Body: BodyDecStat ReturnStatement {printOut("BODY \n");}
-        | %empty
-        ; 
-
-BodyDecStat:BodyDecStat Declaration 
-        |BodyDecStat Statement
+BodyDecStat: BodyDecStat Declaration 
+        | BodyDecStat Statement
         | %empty
         ;
 
@@ -184,7 +170,7 @@ Expression: Expression T_PLUS Expression
         |Expression T_EQUALS Expression 
         |Expression T_AND Expression 
         |Expression T_OR Expression 
-        |T_NOT Expression 
+        |T_NOT Expression %prec T_NOT
         |T_UNARYMINUS Expression %prec T_UNARYMINUS
         |T_ID 
         |T_ID T_DOT T_ID 
