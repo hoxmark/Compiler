@@ -46,6 +46,7 @@
 %token T_LP
 %token T_RP
 %token T_PLUS T_MINUS  
+%token T_UNARYMINUS  
 %token T_DIVIDE T_MULTIPLY
 %token T_LESS
 %token T_LESSOREQUAL
@@ -62,10 +63,10 @@
 	char *sval;
 }
 
-%left T_FUNC
 %left T_PLUS T_MINUS
 %left T_DIVIDE T_MULTIPLY
-%right T_NOT U_MINUS
+%right T_NOT T_UNARYMINUS
+
 
 %%
 
@@ -142,6 +143,11 @@ ReturnStatement: T_RETURN Expression T_SEMICOL
         |
         ; 
 
+One_Or_More_Statements: One_Or_More_Statements Statement 
+        | Statement
+        ;
+
+
 Zero_Or_More_Statements: Zero_Or_More_Statements Statement
         |
         ; 
@@ -172,7 +178,7 @@ WhileLoop: T_WHILE Expression T_LC Block T_RC
 RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL
         ;
 
-Block: Zero_Or_More_Statements
+Block: One_Or_More_Statements
         ;
 Print: T_PRINT Expression T_SEMICOL
         ;
@@ -187,7 +193,7 @@ Expression: Expression T_PLUS Expression
         |Expression T_AND Expression 
         |Expression T_OR Expression 
         |T_NOT Expression 
-        |T_MINUS Expression %prec U_MINUS 
+        |T_UNARYMINUS Expression %prec T_UNARYMINUS
         |T_ID 
         |T_ID T_DOT T_ID 
         |MethodCall 

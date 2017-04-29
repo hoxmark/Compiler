@@ -19,12 +19,10 @@
 %}
 
 
+/*TODO: EOF in comment*/
 /* WRITEME: Write any definitions here. You can find information on
             definitions here:
             ftp://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/html_mono/flex.html#SEC10 */
-
-DIGIT    [0-9]
-
 
 /* WRITEME: If you are going to use start conditions, write them here.
             You can find more information on start conditions here:
@@ -42,9 +40,8 @@ DIGIT    [0-9]
 
 <COMMENT>[^*\n]*        /* Taken from the given documentation. eat anything that's not a '*' */
 <COMMENT>"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
-<COMMENT>\n             ++numLine;
+<COMMENT>\n             {++yylineno;}
 <COMMENT>"*"+"/"        BEGIN(INITIAL);
-  /* WRITEME: Write your Flex token rules here */
 
 
 [ \t\n]+                /* eat up whitespace */
@@ -74,7 +71,7 @@ DIGIT    [0-9]
 
 "+"                    {printOut("+"); return T_PLUS;}
 "/"                    {printOut("/"); return T_DIVIDE;}
-"-"                    {printOut("-"); return T_MINUS;}
+"- "                    {printOut("-"); return T_MINUS;}
 "*"                    {printOut("*"); return T_MULTIPLY;}
 "."                    {printOut("."); return T_DOT;}
 "!"                    {printOut("!"); return T_NOT;}
@@ -86,10 +83,13 @@ DIGIT    [0-9]
 
 "<"                    {printOut("<" ); return T_LESS;}
 "<="                   {printOut("<=" ); return T_LESSOREQUAL;}
+"-"                    {printOut("UNARY -" ); return T_UNARYMINUS;}
 
+                      
 [1-9][0-9]*|0         {printOut("ITERAL:"); yylval.ival = atoi(yytext); return T_LITERAL;}
 
 [a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.sval = strdup(yytext); return T_ID; }                     
+
 
 .                   {yyerror("invalid character"); } 
 
