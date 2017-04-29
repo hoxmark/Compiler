@@ -18,27 +18,14 @@
   
 %}
 
-
-/*TODO: EOF in comment*/
-/* WRITEME: Write any definitions here. You can find information on
-            definitions here:
-            ftp://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/html_mono/flex.html#SEC10 */
-
-/* WRITEME: If you are going to use start conditions, write them here.
-            You can find more information on start conditions here:
-            ftp://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/html_mono/flex.html#SEC11
-            You will probably want to use exclusive conditions rather
-            than inclusive conditions (use the %x instead of the %s). */
-
-
-
 %x COMMENT
 %%
 
 "/*"         BEGIN(COMMENT);
 
 
-<COMMENT>[^*\n]*        /* Taken from the given documentation. eat anything that's not a '*' */
+<COMMENT>[^*\n]*        /* Taken from the given flex documentation. 
+                          eat anything that's not a '*' */
 <COMMENT>"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
 <COMMENT>\n             
 <COMMENT>"*"+"/"        BEGIN(INITIAL);

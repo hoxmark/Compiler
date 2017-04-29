@@ -152,7 +152,7 @@ Statement:Assignment
         |Print
         ;
 
-Assignment: T_ID T_ASSIGN Expression T_SEMICOL {printOut("ASSIGNMENT OK  1");}
+Assignment: T_ID T_ASSIGN Expression T_SEMICOL 
         | T_ID T_DOT T_ID T_ASSIGN Expression T_SEMICOL
         ;
 
