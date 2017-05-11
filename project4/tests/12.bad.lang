@@ -1,0 +1,7 @@
+c0 [
+    boolean m0;
+    f0(a0 : boolean, a1 : boolean) -> integer {
+        print false;
+        return 191;
+        }
+    }
