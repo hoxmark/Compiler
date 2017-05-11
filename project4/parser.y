@@ -60,10 +60,15 @@
 
 
 %type <type_ptr> Type
+%type <declaration_list_ptr> One_Or_More_Declarations
 %type <declaration_ptr> Declaration
 %type <while_ptr> WhileLoop
 %type <returnstatement_ptr> ReturnStatement
+%type <statement_list_ptr> Block One_Or_More_Statements
+%type <statement_ptr> Statement
+%type <methodcall_ptr> MethodCalling MethodCall
 %type <print_ptr> Print
+%type <repeat_ptr> RepeatUntil
 %type <expression_ptr> Expression
 %type <methodcall_ptr> MethodCall
 %type <identifier_list_ptr> IDS
@@ -72,6 +77,7 @@
 %type <base_int> T_TRUE 
 %type <base_int> T_FALSE 
 %type <base_char_ptr> T_ID
+
 
 
 
@@ -136,11 +142,11 @@ BodyDecStat: One_Or_More_Declarations
         | 
         ;
 
- One_Or_More_Declarations: One_Or_More_Declarations Declaration 
-        | Declaration
+ One_Or_More_Declarations: One_Or_More_Declarations Declaration {$$->push_back($2); }
+        | Declaration                   { $$ = new std::list<DeclarationNode*>(); $$->push_back($1);}
         ;
 
-Declaration: Type IDS T_SEMICOL  {$$ = new DeclarationNode($1, $2);}
+Declaration: Type IDS T_SEMICOL         { $$ = new DeclarationNode($1, $2);}
         ;
 
 IDS:  T_ID                     { $$ = new std::list<IdentifierNode*>(); $$->push_back(new IdentifierNode($1));}
@@ -152,22 +158,22 @@ ReturnStatement: T_RETURN Expression T_SEMICOL { $$ = new ReturnStatementNode($2
         ; 
 
 One_Or_More_Statements: One_Or_More_Statements Statement 
-        | Statement
+        | Statement      { /*$$ = new std::list<StatementNode*>(); $$->push_back($1);*/}
         ;
 
-Statement:Assignment
+Statement:Assignment        
         |MethodCalling
         |IfElse
         |WhileLoop
-        |RepeatUntil
-        |Print
+        |RepeatUntil    
+        |Print          {$$ = $1; astRoot = $$;}
         ;
 
 Assignment: T_ID T_ASSIGN Expression T_SEMICOL 
         | T_ID T_DOT T_ID T_ASSIGN Expression T_SEMICOL
         ;
 
-MethodCalling: MethodCall T_SEMICOL
+MethodCalling: MethodCall T_SEMICOL {$$ =$1;}
         ;
 
 IfElse: T_IF Expression T_LC Block T_RC
@@ -177,10 +183,10 @@ IfElse: T_IF Expression T_LC Block T_RC
 WhileLoop: T_WHILE Expression T_LC Block T_RC  {/*$$ = new WhileNode($2, $4)*/}
         ;
 
-RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL
+RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL { /* $$ = new RepeatNode()*/}
         ;
 
-Block: One_Or_More_Statements                  
+Block: One_Or_More_Statements                   {/*$$ = $1*/}        
         ;       
 Print: T_PRINT Expression T_SEMICOL             {$$ = new PrintNode($2);}          
         ;

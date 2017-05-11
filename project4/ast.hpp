@@ -41,11 +41,11 @@ class MemberAccessNode; //used
 class VariableNode;     //used
 class IntegerLiteralNode;//used
 class BooleanLiteralNode;//used
-class NewNode;
-class IntegerTypeNode;
-class BooleanTypeNode;
-class ObjectTypeNode;
-class NoneNode;
+class NewNode;          //used
+class IntegerTypeNode;  //used
+class BooleanTypeNode;  //used
+class ObjectTypeNode;   //used
+class NoneNode;       //used
 
 
 class StatementNode;
