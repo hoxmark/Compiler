@@ -2,10 +2,10 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <iostream>
-
+    #include <list>
     #include "ast.hpp"
     
-    using namespace std;
+//     using namespace std;
     #define YYDEBUG 1
     int yylex(void);
     void yyerror(const char *);
@@ -59,8 +59,14 @@
 %token T_ASSIGN
 
 
+%type <type_ptr> Type
+%type <declaration_ptr> Declaration
+%type <while_ptr> WhileLoop
+%type <returnstatement_ptr> ReturnStatement
+%type <print_ptr> Print
 %type <expression_ptr> Expression
 %type <methodcall_ptr> MethodCall
+%type <identifier_list_ptr> IDS
 
 %type <base_int> T_LITERAL 
 %type <base_int> T_TRUE 
@@ -103,13 +109,13 @@ One_Or_More_Methods: One_Or_More_Methods Method
         | Method
         ;
 
-Member: Type T_ID T_SEMICOL
+Member: Type T_ID T_SEMICOL     
         ;
 
-Type: T_INTEGER                 {printOut("Type Inte");}
-        | T_BOOLEAN             {printOut("Type bool");}
-        | T_NONE                {printOut("Type None");}
-        | T_ID                  {printOut("Type T_ID");}
+Type: T_INTEGER                 {$$ = new IntegerTypeNode();}
+        | T_BOOLEAN             {$$ = new BooleanTypeNode();}
+        | T_NONE                {$$ = new NoneNode();}
+        | T_ID                  {$$ = new ObjectTypeNode(new IdentifierNode($1));}
         ;
 
 Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat ReturnStatement T_RC  {printOut("METHOD \n");}
@@ -134,14 +140,14 @@ BodyDecStat: One_Or_More_Declarations
         | Declaration
         ;
 
-Declaration: Type IDS T_SEMICOL  
+Declaration: Type IDS T_SEMICOL  {$$ = new DeclarationNode($1, $2);}
         ;
 
-IDS:  T_ID
-        | IDS T_COMMA T_ID
+IDS:  T_ID                     { $$ = new std::list<IdentifierNode*>(); $$->push_back(new IdentifierNode($1));}
+        | IDS T_COMMA T_ID     { $$->push_back(new IdentifierNode($3)); } 
         ;
 
-ReturnStatement: T_RETURN Expression T_SEMICOL
+ReturnStatement: T_RETURN Expression T_SEMICOL { $$ = new ReturnStatementNode($2); }
         |
         ; 
 
@@ -168,15 +174,15 @@ IfElse: T_IF Expression T_LC Block T_RC
         | T_IF Expression T_LC Block T_RC T_ELSE T_LC Block T_RC
         ;
 
-WhileLoop: T_WHILE Expression T_LC Block T_RC
+WhileLoop: T_WHILE Expression T_LC Block T_RC  {/*$$ = new WhileNode($2, $4)*/}
         ;
 
 RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL
         ;
 
-Block: One_Or_More_Statements
-        ;
-Print: T_PRINT Expression T_SEMICOL             
+Block: One_Or_More_Statements                  
+        ;       
+Print: T_PRINT Expression T_SEMICOL             {$$ = new PrintNode($2);}          
         ;
 
 Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }   
@@ -190,10 +196,10 @@ Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }
         |Expression T_OR Expression             {$$ = new OrNode($1, $3); }      
         |T_NOT Expression                       {$$ = new NotNode($2); }
         |T_MINUS Expression %prec T_UNARYMINUS  {$$ = new NegationNode($2); }  
-        |MethodCall                             {$$ = $1;}   
+        |MethodCall                             {/*$$ = $1;*/}   
         |T_ID                                   {$$ = new VariableNode(new IdentifierNode($1)); }
         |T_ID T_DOT T_ID                        {$$ = new MemberAccessNode(new IdentifierNode($1), new IdentifierNode($3));}
-        |T_LP Expression T_RP                   {/*$$ = new ExpressionNode($2); */} 
+        |T_LP Expression T_RP                   {$$ =  $2; } 
         |T_LITERAL                              {$$ = new IntegerLiteralNode(new IntegerNode($1)); }  
         |T_TRUE                                 {$$ = new BooleanLiteralNode(new IntegerNode($1)); }                   
         |T_FALSE                                {$$ = new BooleanLiteralNode(new IntegerNode($1));  } 
@@ -206,7 +212,7 @@ MethodCall: T_ID T_LP Arguments T_RP
         ;
 
 Arguments: ArgumentsP
-        | 
+        |                                      
         ;
 
 ArgumentsP: Arguments T_COMMA Expression        
@@ -215,7 +221,7 @@ ArgumentsP: Arguments T_COMMA Expression
 
 %%
 
-extern int yylineno;
+extern int yylineno; 
 
 void yyerror(const char *s) {
   fprintf(stderr, "%s at line %d\n", s, yylineno);
