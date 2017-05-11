@@ -24,23 +24,23 @@ class CallNode;
 class IfElseNode;
 class WhileNode;
 class RepeatNode;
-class PrintNode;
-class PlusNode;
-class MinusNode;
-class TimesNode;
-class DivideNode;
-class LessNode;
-class LessEqualNode;
-class EqualNode;
-class AndNode;
-class OrNode;
-class NotNode;
-class NegationNode;
-class MethodCallNode;
-class MemberAccessNode;
-class VariableNode;
-class IntegerLiteralNode;
-class BooleanLiteralNode;
+class PrintNode;        
+class PlusNode;         //used
+class MinusNode;        //used
+class TimesNode;        //used
+class DivideNode;       //used  
+class LessNode;         //used
+class LessEqualNode;    //used
+class EqualNode;        //used  
+class AndNode;          //used
+class OrNode;           //used
+class NotNode;          //used
+class NegationNode;       //used
+class MethodCallNode; 
+class MemberAccessNode; //used
+class VariableNode;     //used
+class IntegerLiteralNode;//used
+class BooleanLiteralNode;//used
 class NewNode;
 class IntegerTypeNode;
 class BooleanTypeNode;

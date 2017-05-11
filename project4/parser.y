@@ -11,7 +11,7 @@
     void yyerror(const char *);
     void printOut(const char *);
     
-    extern ASTNode* astRoot;
+    extern ASTNode* astRoot; 
 
     
 %}
@@ -50,18 +50,24 @@
 %token T_LESS
 %token T_LESSOREQUAL
 %token T_COMMA
-%token <ival> T_LITERAL
+%token T_LITERAL
 %token T_DOT
 %token T_SEMICOL
 %token T_FUNC
 %token T_COLON
-%token <sval> T_ID
+%token T_ID
 %token T_ASSIGN
 
-%union {
-	int ival;
-	char *sval;
-}
+
+%type <expression_ptr> Expression
+%type <methodcall_ptr> MethodCall
+
+%type <base_int> T_LITERAL 
+%type <base_int> T_TRUE 
+%type <base_int> T_FALSE 
+%type <base_char_ptr> T_ID
+
+
 
 %left T_OR 
 %left T_AND
@@ -170,42 +176,42 @@ RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL
 
 Block: One_Or_More_Statements
         ;
-Print: T_PRINT Expression T_SEMICOL
+Print: T_PRINT Expression T_SEMICOL             
         ;
 
-Expression: Expression T_PLUS Expression   
-        |Expression T_MINUS Expression  
-        |Expression T_MULTIPLY Expression 
-        |Expression T_DIVIDE Expression 
-        |Expression T_LESS Expression 
-        |Expression T_LESSOREQUAL Expression 
-        |Expression T_EQUALS Expression 
-        |Expression T_AND Expression 
-        |Expression T_OR Expression 
-        |T_NOT Expression 
-        |T_MINUS Expression %prec T_UNARYMINUS
-        |T_ID 
-        |T_ID T_DOT T_ID 
-        |MethodCall 
-        |T_LP Expression T_RP 
-        |T_LITERAL  
-        |T_TRUE 
-        |T_FALSE 
-        |T_NEW T_ID 
-        |T_NEW T_ID T_LP Arguments T_RP 
+Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }   
+        |Expression T_MINUS Expression           {$$ = new MinusNode($1, $3); }   
+        |Expression T_MULTIPLY Expression       {$$ = new TimesNode($1, $3); } 
+        |Expression T_DIVIDE Expression         {$$ = new DivideNode($1, $3); }      
+        |Expression T_LESS Expression           {$$ = new LessNode($1, $3); }     
+        |Expression T_LESSOREQUAL Expression    {$$ = new LessEqualNode($1, $3); } 
+        |Expression T_EQUALS Expression         {$$ = new EqualNode($1, $3); }  
+        |Expression T_AND Expression            {$$ = new AndNode($1, $3); }           
+        |Expression T_OR Expression             {$$ = new OrNode($1, $3); }      
+        |T_NOT Expression                       {$$ = new NotNode($2); }
+        |T_MINUS Expression %prec T_UNARYMINUS  {$$ = new NegationNode($2); }  
+        |MethodCall                             {$$ = $1;}   
+        |T_ID                                   {$$ = new VariableNode(new IdentifierNode($1)); }
+        |T_ID T_DOT T_ID                        {$$ = new MemberAccessNode(new IdentifierNode($1), new IdentifierNode($3));}
+        |T_LP Expression T_RP                   {/*$$ = new ExpressionNode($2); */} 
+        |T_LITERAL                              {$$ = new IntegerLiteralNode(new IntegerNode($1)); }  
+        |T_TRUE                                 {$$ = new BooleanLiteralNode(new IntegerNode($1)); }                   
+        |T_FALSE                                {$$ = new BooleanLiteralNode(new IntegerNode($1));  } 
+        |T_NEW T_ID                             {$$ = new NewNode(new IdentifierNode($2), NULL); /* eller? new std::list<ExpressionNode*>());*/ }                           
+        |T_NEW T_ID T_LP Arguments T_RP         {$$ = new NewNode(new IdentifierNode($2), NULL); /* eller? new std::list<ExpressionNode*>());*/ }  
         ;
 
-MethodCall: T_ID T_LP Arguments T_RP
-        | T_ID T_DOT T_ID T_LP Arguments T_RP
+MethodCall: T_ID T_LP Arguments T_RP            
+        | T_ID T_DOT T_ID T_LP Arguments T_RP  
         ;
+
 Arguments: ArgumentsP
         | 
         ;
 
-ArgumentsP: Arguments T_COMMA Expression
-        | Expression
+ArgumentsP: Arguments T_COMMA Expression        
+        | Expression                            
         ;
-
 
 %%
 
@@ -219,3 +225,17 @@ void yyerror(const char *s) {
 void printOut(const char *s) {
   // fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
 }
+
+
+/*
+ {$$ = MethodCallNode(new IdentifierNode($1), new IdentifierNode($3), $5)}
+
+{$$ = new BooleanTypeNode(TypeNode(true)); astRoot = $$; }     
+
+
+              
+                           
+
+      
+*/
+
