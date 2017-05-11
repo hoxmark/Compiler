@@ -1824,6 +1824,6 @@ void yyerror(const char *s) {
 }
 
 void printOut(const char *s) {
-  fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
+  // fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
 }
 

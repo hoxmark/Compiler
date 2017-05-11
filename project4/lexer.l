@@ -76,9 +76,9 @@
 "<="                   {printOut("<=" ); return T_LESSOREQUAL;}
 
                       
-[1-9][0-9]*|0         {printOut("ITERAL:"); yylval.ival = atoi(yytext); return T_LITERAL;}
+[1-9][0-9]*|0         {printOut("ITERAL:");  return T_LITERAL;}
 
-[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.sval = strdup(yytext); return T_ID; }                     
+[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" );    return T_ID; }                     
 
 
 .                   {yyerror("invalid character"); } 
