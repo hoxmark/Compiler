@@ -59,6 +59,7 @@
 %token T_ASSIGN
 
 
+%type <parameter_list_ptr> Parameter Zero_Or_More_Parameters
 %type <type_ptr> Type
 %type <declaration_list_ptr> One_Or_More_Declarations
 %type <declaration_ptr> Declaration
@@ -70,14 +71,13 @@
 %type <print_ptr> Print
 %type <repeat_ptr> RepeatUntil
 %type <expression_ptr> Expression
-%type <methodcall_ptr> MethodCall
 %type <identifier_list_ptr> IDS
+%type <expression_list_ptr> Arguments ArgumentsP
 
 %type <base_int> T_LITERAL 
 %type <base_int> T_TRUE 
 %type <base_int> T_FALSE 
 %type <base_char_ptr> T_ID
-
 
 
 
@@ -128,12 +128,12 @@ Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat Retu
         ; 
  
 
-Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {printOut("Zero or More Para \n");}
-        | 
+Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {$$=$1; /*TODO: riktig? */}
+        |                          { $$ = NULL;} 
         ;
 
-Parameter: T_ID T_COLON Type                        {printOut("Parameter1 \n");}
-        | T_ID T_COLON Type T_COMMA Parameter       {printOut("Parameter2 \n");}
+Parameter: T_ID T_COLON Type                { $$ = new std::list<ParameterNode*>(); $$->push_back(new ParameterNode($3, new IdentifierNode($1))); /*TODO is this ocrrect? */}      
+        | T_ID T_COLON Type T_COMMA Parameter   {$$->push_back(new ParameterNode($3, new IdentifierNode($1)));}    
         ; 
   
 BodyDecStat: One_Or_More_Declarations 
@@ -162,21 +162,21 @@ One_Or_More_Statements: One_Or_More_Statements Statement
         ;
 
 Statement:Assignment        
-        |MethodCalling
+        |MethodCalling  {}
         |IfElse
         |WhileLoop
         |RepeatUntil    
-        |Print          {$$ = $1; astRoot = $$;}
+        |Print          {$$ = $1; }
         ;
 
 Assignment: T_ID T_ASSIGN Expression T_SEMICOL 
         | T_ID T_DOT T_ID T_ASSIGN Expression T_SEMICOL
         ;
 
-MethodCalling: MethodCall T_SEMICOL {$$ =$1;}
+MethodCalling: MethodCall T_SEMICOL { $$ = $1;}
         ;
 
-IfElse: T_IF Expression T_LC Block T_RC
+IfElse: T_IF Expression T_LC Block T_RC                                 
         | T_IF Expression T_LC Block T_RC T_ELSE T_LC Block T_RC
         ;
 
@@ -214,15 +214,15 @@ Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }
         ;
 
 MethodCall: T_ID T_LP Arguments T_RP            
-        | T_ID T_DOT T_ID T_LP Arguments T_RP  
+        | T_ID T_DOT T_ID T_LP Arguments T_RP  {$$ = new MethodCallNode(new IdentifierNode($1), new IdentifierNode($3), $5);}
         ;
 
-Arguments: ArgumentsP
-        |                                      
+Arguments: ArgumentsP {$$ = $1;}
+        |   {$$ = new  std::list<ExpressionNode*>();}                                 
         ;
 
-ArgumentsP: Arguments T_COMMA Expression        
-        | Expression                            
+ArgumentsP: Arguments T_COMMA Expression    {$$->push_back($3);}        
+        | Expression       {$$->push_back($1);}                   
         ;
 
 %%
@@ -238,16 +238,4 @@ void printOut(const char *s) {
   // fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
 }
 
-
-/*
- {$$ = MethodCallNode(new IdentifierNode($1), new IdentifierNode($3), $5)}
-
-{$$ = new BooleanTypeNode(TypeNode(true)); astRoot = $$; }     
-
-
-              
-                           
-
-      
-*/
 

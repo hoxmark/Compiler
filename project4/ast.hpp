@@ -45,7 +45,7 @@ class NewNode;          //used
 class IntegerTypeNode;  //used
 class BooleanTypeNode;  //used
 class ObjectTypeNode;   //used
-class NoneNode;       //used
+class NoneNode;       
 
 
 class StatementNode;
