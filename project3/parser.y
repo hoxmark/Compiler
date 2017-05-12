@@ -84,9 +84,9 @@ Class:  T_ID T_LC MethodsAndMembers T_RC
         | T_ID T_EXTENDS T_ID T_LC MethodsAndMembers T_RC 
         ;
 
-MethodsAndMembers: One_Or_More_Members
+MethodsAndMembers: One_Or_More_Declarations
         | One_Or_More_Methods
-        | One_Or_More_Members One_Or_More_Methods
+        | One_Or_More_Declarations One_Or_More_Methods
         | %empty
         ; 
 

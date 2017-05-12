@@ -7,6 +7,7 @@
     
 //     using namespace std;
     #define YYDEBUG 1
+//     #define YYINITDEPTH 10000
     int yylex(void);
     void yyerror(const char *);
     void printOut(const char *);
@@ -59,6 +60,11 @@
 %token T_ASSIGN
 
 
+
+%type <program_ptr> Start
+%type <class_list_ptr> Classes
+%type <class_ptr> MethodsAndMembers, Class
+%type <method_list_ptr> One_Or_More_Methods
 %type <method_ptr> Method
 %type <methodbody_ptr> BodyDecStat
 %type <parameter_list_ptr> Parameter Zero_Or_More_Parameters
@@ -96,32 +102,29 @@
 
 %%
 
-Start: Classes                       
+Start: Classes          { $$ = new ProgramNode($1); }                    
     ;
 
-Classes: Classes Class                
-        | Class                       
+Classes: Classes Class  { $$->push_back($2); }
+        | Class         { $$ = new std::list<ClassNode*>(); $$->push_back($1); }                   
         ;
 
-Class:  T_ID T_LC MethodsAndMembers T_RC 
-        | T_ID T_EXTENDS T_ID T_LC MethodsAndMembers T_RC 
+Class:  T_ID T_LC MethodsAndMembers T_RC                        { $$ = new ClassNode(new IdentifierNode($1), NULL, $3->declaration_list, $3->method_list);}
+        | T_ID T_EXTENDS T_ID T_LC MethodsAndMembers T_RC       { $$ = new ClassNode(new IdentifierNode($1), new IdentifierNode($3), $5->declaration_list, $5->method_list);}
         ;
 
-MethodsAndMembers: One_Or_More_Members
-        | One_Or_More_Methods
-        | One_Or_More_Members One_Or_More_Methods
+MethodsAndMembers: One_Or_More_Declarations            {$$ = new ClassNode(NULL, NULL, $1,  NULL );}
+        | One_Or_More_Methods                          {$$ = new ClassNode(NULL, NULL, NULL, $1);}
+        | One_Or_More_Declarations One_Or_More_Methods {$$ = new ClassNode(NULL, NULL, $1, $2);}
         | 
         ; 
 
-One_Or_More_Members: One_Or_More_Members Member 
-        | Member
+One_Or_More_Members: One_Or_More_Members Type T_ID T_SEMICOL {/*NEVER USED*/}
+        | Type T_ID T_SEMICOL {/* $$ = new std::list<DeclarationNode*>(); $$->push_back(new DeclarationNode($1, new IdentifierNode($1)));TODO: Multiple IDS? */}
         ;
 
-One_Or_More_Methods: One_Or_More_Methods Method 
-        | Method
-        ;
-
-Member: Type T_ID T_SEMICOL    
+One_Or_More_Methods: One_Or_More_Methods Method { $$->push_back($2);}
+        | Method {$$ = new std::list<MethodNode*>(); $$->push_back($1);}
         ;
 
 Type: T_INTEGER                 {$$ = new IntegerTypeNode();}
