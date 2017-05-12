@@ -59,6 +59,8 @@
 %token T_ASSIGN
 
 
+%type <method_ptr> Method
+%type <methodbody_ptr> BodyDecStat
 %type <parameter_list_ptr> Parameter Zero_Or_More_Parameters
 %type <type_ptr> Type
 %type <declaration_list_ptr> One_Or_More_Declarations
@@ -67,7 +69,11 @@
 %type <returnstatement_ptr> ReturnStatement
 %type <statement_list_ptr> Block One_Or_More_Statements
 %type <statement_ptr> Statement
-%type <methodcall_ptr> MethodCalling MethodCall
+%type <methodcall_ptr> MethodCall
+%type <call_ptr> MethodCalling 
+
+%type <assignment_ptr> Assignment
+%type <ifelse_ptr> IfElse
 %type <print_ptr> Print
 %type <repeat_ptr> RepeatUntil
 %type <expression_ptr> Expression
@@ -115,7 +121,7 @@ One_Or_More_Methods: One_Or_More_Methods Method
         | Method
         ;
 
-Member: Type T_ID T_SEMICOL     
+Member: Type T_ID T_SEMICOL    
         ;
 
 Type: T_INTEGER                 {$$ = new IntegerTypeNode();}
@@ -124,11 +130,11 @@ Type: T_INTEGER                 {$$ = new IntegerTypeNode();}
         | T_ID                  {$$ = new ObjectTypeNode(new IdentifierNode($1));}
         ;
 
-Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat ReturnStatement T_RC  {printOut("METHOD \n");}
+Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat ReturnStatement T_RC  {$$ = new MethodNode(new IdentifierNode($1), $3, $6, $8); }
         ; 
  
 
-Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {$$=$1; /*TODO: riktig? */}
+Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {$$=$1; /*TODO: er dette egentlig riktig? */}
         |                          { $$ = NULL;} 
         ;
 
@@ -136,9 +142,9 @@ Parameter: T_ID T_COLON Type                { $$ = new std::list<ParameterNode*>
         | T_ID T_COLON Type T_COMMA Parameter   {$$->push_back(new ParameterNode($3, new IdentifierNode($1)));}    
         ; 
   
-BodyDecStat: One_Or_More_Declarations 
-        | One_Or_More_Statements
-        | One_Or_More_Declarations One_Or_More_Statements
+BodyDecStat: One_Or_More_Declarations                     {$$ = new MethodBodyNode($1, NULL, NULL); /*TODO RETURN VALUE*/}
+        | One_Or_More_Statements                          {$$ = new MethodBodyNode(NULL, $1, NULL); /*TODO RETURN VALUE*/}
+        | One_Or_More_Declarations One_Or_More_Statements {$$ = new MethodBodyNode($1, $2, NULL); /*TODO RETURN VALUE*/}
         | 
         ;
 
@@ -157,42 +163,43 @@ ReturnStatement: T_RETURN Expression T_SEMICOL { $$ = new ReturnStatementNode($2
         |
         ; 
 
-One_Or_More_Statements: One_Or_More_Statements Statement 
-        | Statement      { /*$$ = new std::list<StatementNode*>(); $$->push_back($1);*/}
+One_Or_More_Statements: One_Or_More_Statements Statement {$$->push_back($2); }
+        | Statement      { $$ = new std::list<StatementNode*>(); $$->push_back($1); }
         ;
 
-Statement:Assignment        
-        |MethodCalling  {}
-        |IfElse
-        |WhileLoop
-        |RepeatUntil    
+Statement:Assignment    {$$ = $1; }  
+        |MethodCalling  {$$ = $1; }
+        |IfElse         {$$ = $1; }
+        |WhileLoop      {$$=  $1; }
+        |RepeatUntil    {$$ = $1; }
         |Print          {$$ = $1; }
         ;
 
-Assignment: T_ID T_ASSIGN Expression T_SEMICOL 
-        | T_ID T_DOT T_ID T_ASSIGN Expression T_SEMICOL
+Assignment: T_ID T_ASSIGN Expression T_SEMICOL          {$$ = new  AssignmentNode(new IdentifierNode($1), NULL, $3);}
+        | T_ID T_DOT T_ID T_ASSIGN Expression T_SEMICOL {$$ = new  AssignmentNode(new IdentifierNode($1), new IdentifierNode($3), $5);}
+        
         ;
 
-MethodCalling: MethodCall T_SEMICOL { $$ = $1;}
+MethodCalling: MethodCall T_SEMICOL     { $$ = new CallNode($1);}
         ;
 
-IfElse: T_IF Expression T_LC Block T_RC                                 
-        | T_IF Expression T_LC Block T_RC T_ELSE T_LC Block T_RC
+IfElse:   T_IF Expression T_LC Block T_RC         {$$ = new IfElseNode($2, $4, NULL);}
+        | T_IF Expression T_LC Block T_RC T_ELSE T_LC Block T_RC {$$ = new IfElseNode($2, $4, $8);}                           
         ;
 
-WhileLoop: T_WHILE Expression T_LC Block T_RC  {/*$$ = new WhileNode($2, $4)*/}
+WhileLoop: T_WHILE Expression T_LC Block T_RC  {$$ = new WhileNode($2, $4);}
         ;
 
-RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL { /* $$ = new RepeatNode()*/}
+RepeatUntil: T_REPEAT T_LC Block T_RC T_UNTIL T_LP Expression T_RP T_SEMICOL {  $$ = new RepeatNode($3, $7);}
         ;
 
-Block: One_Or_More_Statements                   {/*$$ = $1*/}        
+Block: One_Or_More_Statements                   {$$ = $1;}        
         ;       
 Print: T_PRINT Expression T_SEMICOL             {$$ = new PrintNode($2);}          
         ;
 
-Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }   
-        |Expression T_MINUS Expression           {$$ = new MinusNode($1, $3); }   
+Expression: Expression T_PLUS Expression        {$$ = new PlusNode($1, $3); }   
+        |Expression T_MINUS Expression          {$$ = new MinusNode($1, $3); }   
         |Expression T_MULTIPLY Expression       {$$ = new TimesNode($1, $3); } 
         |Expression T_DIVIDE Expression         {$$ = new DivideNode($1, $3); }      
         |Expression T_LESS Expression           {$$ = new LessNode($1, $3); }     
@@ -202,7 +209,7 @@ Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }
         |Expression T_OR Expression             {$$ = new OrNode($1, $3); }      
         |T_NOT Expression                       {$$ = new NotNode($2); }
         |T_MINUS Expression %prec T_UNARYMINUS  {$$ = new NegationNode($2); }  
-        |MethodCall                             {/*$$ = $1;*/}   
+        |MethodCall                             {$$ = $1;}   
         |T_ID                                   {$$ = new VariableNode(new IdentifierNode($1)); }
         |T_ID T_DOT T_ID                        {$$ = new MemberAccessNode(new IdentifierNode($1), new IdentifierNode($3));}
         |T_LP Expression T_RP                   {$$ =  $2; } 
@@ -213,7 +220,7 @@ Expression: Expression T_PLUS Expression         {$$ = new PlusNode($1, $3); }
         |T_NEW T_ID T_LP Arguments T_RP         {$$ = new NewNode(new IdentifierNode($2), NULL); /* eller? new std::list<ExpressionNode*>());*/ }  
         ;
 
-MethodCall: T_ID T_LP Arguments T_RP            
+MethodCall: T_ID T_LP Arguments T_RP           {$$ = new MethodCallNode(new IdentifierNode($1), NULL, $3);}
         | T_ID T_DOT T_ID T_LP Arguments T_RP  {$$ = new MethodCallNode(new IdentifierNode($1), new IdentifierNode($3), $5);}
         ;
 
