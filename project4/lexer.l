@@ -53,7 +53,7 @@
 "or"                   {printOut("or"); return T_OR;}
 "not"                  {printOut("not"); return T_NOT;}
 "true"                 {printOut("true"); yylval.base_int = 1; return T_TRUE;}
-"false"                {printOut("false"); yylval.base_int = 1; return T_FALSE;}
+"false"                {printOut("false"); yylval.base_int = 0; return T_FALSE;}
 "extends"              {printOut("extends"); return T_EXTENDS;}
 "repeat"               {printOut("repeat"); return T_REPEAT;}
 "until"                {printOut("until"); return T_UNTIL;}
@@ -78,7 +78,7 @@
                       
 [1-9][0-9]*|0         {printOut("ITERAL:"); yylval.base_int  = atoi(yytext); return T_LITERAL;}
 
-[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.base_char_ptr = yytext; return T_ID; }                     
+[a-zA-Z][a-zA-Z0-9]*  {printOut("ID:" ); yylval.base_char_ptr = yytext; char *key = (char*)malloc(yyleng * sizeof(char)); strcpy(key, yytext); yylval.base_char_ptr = key; return T_ID;}                     
 
 
 .                   {yyerror("invalid character"); } 

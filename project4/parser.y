@@ -7,10 +7,11 @@
     
 //     using namespace std;
     #define YYDEBUG 1
-//     #define YYINITDEPTH 10000
+    #define YYINITDEPTH 10000
     int yylex(void);
     void yyerror(const char *);
     void printOut(const char *);
+    void printOut2(const char *);
     
     extern ASTNode* astRoot; 
 
@@ -67,7 +68,8 @@
 %type <method_list_ptr> One_Or_More_Methods
 %type <method_ptr> Method
 %type <methodbody_ptr> BodyDecStat
-%type <parameter_list_ptr> Parameter Zero_Or_More_Parameters
+%type <parameter_list_ptr> Zero_Or_More_Parameters
+%type <parameter_ptr> Parameter 
 %type <type_ptr> Type
 %type <declaration_list_ptr> One_Or_More_Declarations
 %type <declaration_ptr> Declaration
@@ -91,8 +93,6 @@
 %type <base_int> T_FALSE 
 %type <base_char_ptr> T_ID
 
-
-
 %left T_OR 
 %left T_AND
 %left T_LESS T_LESSOREQUAL T_EQUALS
@@ -102,10 +102,10 @@
 
 %%
 
-Start: Classes          { $$ = new ProgramNode($1);  astRoot = $$; }                    
+Start: Classes          { $$ = new ProgramNode($1);   astRoot = $$;}                    
     ;
 
-Classes: Classes Class  { $$->push_back($2); }
+Classes: Classes Class  { $$=$1; $$->push_back($2); }
         | Class         { $$ = new std::list<ClassNode*>(); $$->push_back($1); }                   
         ;
 
@@ -119,8 +119,8 @@ MethodsAndMembers: One_Or_More_Declarations            {$$ = new ClassNode(NULL,
         | 
         ; 
 
-One_Or_More_Methods: One_Or_More_Methods Method { $$->push_back($2);}
-        | Method {$$ = new std::list<MethodNode*>(); $$->push_back($1);}
+One_Or_More_Methods: One_Or_More_Methods Method { $$=$1;  $$->push_back($2);}
+        | Method                                { $$ = new std::list<MethodNode*>(); $$->push_back($1);}
         ;
 
 Type: T_INTEGER                 {$$ = new IntegerTypeNode();}
@@ -129,47 +129,47 @@ Type: T_INTEGER                 {$$ = new IntegerTypeNode();}
         | T_ID                  {$$ = new ObjectTypeNode(new IdentifierNode($1));}
         ;
 
-Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat  T_RC  {$$ = new MethodNode(new IdentifierNode($1), $3, $6, $8); }
+Method: T_ID T_LP Zero_Or_More_Parameters T_RP T_FUNC Type T_LC BodyDecStat  T_RC  {$$ = new MethodNode(new IdentifierNode($1), $3, $6, $8);  }
         ; 
  
 
-Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter  {$$=$1; /*TODO: er dette egentlig riktig? */}
-        |                          {$$ = NULL;} 
+Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter      { $$ = $1; $$->push_back($2);}
+        |                                                       { $$ = new std::list<ParameterNode*>();} 
         ;
 
-Parameter: T_ID T_COLON Type                    { $$ = new std::list<ParameterNode*>(); $$->push_back(new ParameterNode($3, new IdentifierNode($1))); /*TODO is this ocrrect? */}      
-        | T_ID T_COLON Type T_COMMA Parameter   { $$->push_back(new ParameterNode($3, new IdentifierNode($1)));}    
+Parameter: T_ID T_COLON Type                    { $$ = new ParameterNode($3, new IdentifierNode($1)); }      
+        | T_ID T_COLON Type T_COMMA Parameter   { $$ = new ParameterNode($3, new IdentifierNode($1)); }    
         ; 
   
-BodyDecStat: One_Or_More_Declarations ReturnStatement                   {$$ = new MethodBodyNode($1, NULL, $2); /*TODO RETURN VALUE*/}
-        | One_Or_More_Statements ReturnStatement                   {$$ = new MethodBodyNode(NULL, $1, $2); /*TODO RETURN VALUE*/}
-        | One_Or_More_Declarations One_Or_More_Statements ReturnStatement {$$ = new MethodBodyNode($1, $2, $3); /*TODO RETURN VALUE*/}
+BodyDecStat: One_Or_More_Declarations ReturnStatement                           {$$ = new MethodBodyNode($1, NULL, $2); }
+        | One_Or_More_Statements ReturnStatement                                {$$ = new MethodBodyNode(NULL, $1, $2); }
+        | One_Or_More_Declarations One_Or_More_Statements ReturnStatement       {$$ = new MethodBodyNode($1, $2, $3); }
         | 
         ;
 
-One_Or_More_Declarations: One_Or_More_Declarations Declaration  { $$->push_back($2); }
+One_Or_More_Declarations: One_Or_More_Declarations Declaration  {$$=$1;  $$->push_back($2); }
         | Declaration                                           { $$ = new std::list<DeclarationNode*>(); $$->push_back($1);}
         ;
 
 Declaration: Type IDS T_SEMICOL         { $$ = new DeclarationNode($1, $2);}
         ;
 
-IDS:  T_ID                     { $$ = new std::list<IdentifierNode*>(); $$->push_back(new IdentifierNode($1));}
-        | IDS T_COMMA T_ID     { $$->push_back(new IdentifierNode($3)); } 
+IDS:  T_ID                              { $$ = new std::list<IdentifierNode*>(); $$->push_back(new IdentifierNode($1));}
+        | IDS T_COMMA T_ID              { $$->push_back(new IdentifierNode($3)); } 
         ;
 
 ReturnStatement: T_RETURN Expression T_SEMICOL { $$ = new ReturnStatementNode($2); }
         | {$$ = NULL;}
         ; 
 
-One_Or_More_Statements: One_Or_More_Statements Statement {$$->push_back($2); }
+One_Or_More_Statements: One_Or_More_Statements Statement {$$=$1; $$->push_back($2); }
         | Statement      { $$ = new std::list<StatementNode*>(); $$->push_back($1); }
         ;
 
 Statement:Assignment    {$$ = $1; }  
         |MethodCalling  {$$ = $1; }
         |IfElse         {$$ = $1; }
-        |WhileLoop      {$$=  $1; }
+        |WhileLoop      {$$ =  $1; }
         |RepeatUntil    {$$ = $1; }
         |Print          {$$ = $1; }
         ;
@@ -215,8 +215,8 @@ Expression: Expression T_PLUS Expression        {$$ = new PlusNode($1, $3); }
         |T_LITERAL                              {$$ = new IntegerLiteralNode(new IntegerNode($1)); }  
         |T_TRUE                                 {$$ = new BooleanLiteralNode(new IntegerNode($1)); }                   
         |T_FALSE                                {$$ = new BooleanLiteralNode(new IntegerNode($1));  } 
-        |T_NEW T_ID                             {$$ = new NewNode(new IdentifierNode($2), NULL); /* eller? new std::list<ExpressionNode*>());*/ }                           
-        |T_NEW T_ID T_LP Arguments T_RP         {$$ = new NewNode(new IdentifierNode($2), $4); /* eller? new std::list<ExpressionNode*>());*/ }  
+        |T_NEW T_ID                             {$$ = new NewNode(new IdentifierNode($2), new std::list<ExpressionNode*>());  }                           
+        |T_NEW T_ID T_LP Arguments T_RP         {$$ = new NewNode(new IdentifierNode($2), $4);  }  
         ;
 
 MethodCall: T_ID T_LP Arguments T_RP           {$$ = new MethodCallNode(new IdentifierNode($1), NULL, $3);}
@@ -228,7 +228,7 @@ Arguments: ArgumentsP {$$ = $1;}
         ;
 
 ArgumentsP: Arguments T_COMMA Expression    {$$->push_back($3);}        
-        | Expression       {$$->push_back($1);}                   
+        | Expression       {$$ = new  std::list<ExpressionNode*>(); $$->push_back($1);}                   
         ;
 
 %%
@@ -242,6 +242,10 @@ void yyerror(const char *s) {
 
 void printOut(const char *s) {
   // fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
+}
+
+void printOut2(const char *s) {
+  fprintf(stderr, "printOut: %s at line %d\n", s, yylineno);  
 }
 
 
