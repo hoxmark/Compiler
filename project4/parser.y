@@ -60,8 +60,6 @@
 %token T_ID
 %token T_ASSIGN
 
-
-
 %type <program_ptr> Start
 %type <class_list_ptr> Classes
 %type <class_ptr> MethodsAndMembers Class
@@ -116,7 +114,7 @@ Class:  T_ID T_LC MethodsAndMembers T_RC                        { $$ = new Class
 MethodsAndMembers: One_Or_More_Declarations            {$$ = new ClassNode(NULL, NULL, $1,  NULL );}
         | One_Or_More_Methods                          {$$ = new ClassNode(NULL, NULL, NULL, $1);}
         | One_Or_More_Declarations One_Or_More_Methods {$$ = new ClassNode(NULL, NULL, $1, $2);}
-        | 
+        |       {$$ = new ClassNode(NULL, NULL, NULL, NULL);}
         ; 
 
 One_Or_More_Methods: One_Or_More_Methods Method { $$=$1;  $$->push_back($2);}
@@ -138,13 +136,14 @@ Zero_Or_More_Parameters: Zero_Or_More_Parameters Parameter      { $$ = $1; $$->p
         ;
 
 Parameter: T_ID T_COLON Type                    { $$ = new ParameterNode($3, new IdentifierNode($1)); }      
-        | T_ID T_COLON Type T_COMMA Parameter   { $$ = new ParameterNode($3, new IdentifierNode($1)); }    
+        | T_ID T_COLON Type T_COMMA             { $$ = new ParameterNode($3, new IdentifierNode($1)); }    
         ; 
   
 BodyDecStat: One_Or_More_Declarations ReturnStatement                           {$$ = new MethodBodyNode($1, NULL, $2); }
         | One_Or_More_Statements ReturnStatement                                {$$ = new MethodBodyNode(NULL, $1, $2); }
         | One_Or_More_Declarations One_Or_More_Statements ReturnStatement       {$$ = new MethodBodyNode($1, $2, $3); }
-        | 
+        | ReturnStatement                                                       {$$ = new MethodBodyNode(NULL, NULL, $1); }
+        |                                                                       {$$ = new MethodBodyNode(NULL, NULL, NULL); }
         ;
 
 One_Or_More_Declarations: One_Or_More_Declarations Declaration  {$$=$1;  $$->push_back($2); }
