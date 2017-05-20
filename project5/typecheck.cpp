@@ -108,11 +108,16 @@ void TypeCheck::visitClassNode(ClassNode* node) {
   currentMethodTable = new MethodTable();
   thisClassInfo.methods = currentMethodTable;
   
-  currentVariableTable = new VariableTable();
+  this->currentVariableTable = new VariableTable();
   thisClassInfo.members = currentVariableTable;
-  node->visit_children(this);
+  std::cout<< "Member: " << thisClassInfo.members << "\n";
+  std::cout<< "Member2: " << currentVariableTable << "\n";
 
-  classTable->insert(std::pair<std::string, ClassInfo>(currentClassName, thisClassInfo));
+  (*classTable)[currentClassName] = thisClassInfo;
+ 
+  std::cout<< "Member3: " <<  &(*classTable)[currentClassName].members  << "\n";
+  node->visit_children(this);
+  // classTable->insert(std::pair<std::string, ClassInfo>(currentClassName, thisClassInfo));
   
   // WRITEME: Replace with code if necessary
   //set current method table. 
@@ -164,8 +169,9 @@ void TypeCheck::visitMethodNode(MethodNode* node) {
   thisMethodInfo.returnType = compoundType;
   
   thisMethodInfo.localsSize = -(currentLocalOffset+4);
+  (*currentMethodTable)[currentMethodName] = thisMethodInfo;
   
-  currentMethodTable->insert(std::pair<std::string, MethodInfo>(currentMethodName, thisMethodInfo));
+  // currentMethodTable->insert(std::pair<std::string, MethodInfo>(currentMethodName, thisMethodInfo));
 
   // std::cout<<"HER: " << node->type->basetype <<" - " <<string(compoundType) << "\n";
 }
@@ -217,7 +223,9 @@ void TypeCheck::visitParameterNode(ParameterNode* node) {
   variableInfo.size = 4 ; 
   currentParameterOffset += 4;
 
-  currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
+  (*currentVariableTable)[currentVarName] = variableInfo;
+  
+  // currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
       
   // currentMethodTable.find()
   // WRITEME: Replace with code if necessary
@@ -225,7 +233,20 @@ void TypeCheck::visitParameterNode(ParameterNode* node) {
 }
 
 void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
-  std::cout << "visitDeclarationNode type:" << "\n";
+  std::cout << "visitDeclarationNode type:" <<  "\n";
+  
+  //  if((*classTable)[currentClassName].members == *currentVariableTable){
+  // std::cout<<"&(*classTable)[currentClassName].members: \t" <<  << "\n";
+  // std::cout<<"&currentVariableTable: \t\t\t\t" <<  << "\n";
+  if ((*classTable)[currentClassName].members == this->currentVariableTable){
+     std::cout<<"xxxx: " << &currentVariableTable << "\n";
+  }
+  //  }
+  // std::string a = currentClassName; 
+  
+  // if (this == classTable->find(currentClassName)){
+  //   cout << "XZY";
+  // }
 
   node->visit_children(this);
 
@@ -243,7 +264,9 @@ void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
       variableInfo.offset = currentLocalOffset;
       variableInfo.size = 4 ; 
       currentLocalOffset -= 4;
-      currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
+      (*currentVariableTable)[currentVarName] = variableInfo;
+      
+      // currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
 
     }       
     
