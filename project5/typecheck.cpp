@@ -110,6 +110,7 @@ void TypeCheck::visitClassNode(ClassNode* node) {
   
   currentVariableTable = new VariableTable();
   thisClassInfo.members = currentVariableTable;
+  node->visit_children(this);
 
   classTable->insert(std::pair<std::string, ClassInfo>(currentClassName, thisClassInfo));
   
@@ -124,16 +125,11 @@ void TypeCheck::visitClassNode(ClassNode* node) {
     #b Les offsets slide # 
     starter på ocal var 12. 
 
-
     currentLocalOffset 
     currentPatameterOffset
     currentMemberOffset
     this need to be updated all the time. 
-
-
-
   */
-  node->visit_children(this);
   //TODO, telle her? 
   
 }
@@ -151,69 +147,106 @@ void TypeCheck::visitMethodNode(MethodNode* node) {
 //   int localsSize; //TODO
 // } MethodInfo;
 
+
+  currentParameterOffset = 12;
+  currentLocalOffset = -4;
+
   MethodInfo thisMethodInfo; 
   currentVariableTable = new VariableTable();
   thisMethodInfo.variables = currentVariableTable;
-
-
-  // //parameters
-  // for(ParameterNode par : node->parameter_list) {
-
-  // }
-
-  currentMethodTable->insert(std::pair<std::string, MethodInfo>(currentMethodName, thisMethodInfo));
+  
   node->visit_children(this);
+  
+  CompoundType compoundType;
+  compoundType.baseType = node->type->basetype;
+  compoundType.objectClassName = node->type->objectClassName;
+  
+  thisMethodInfo.returnType = compoundType;
+  
+  thisMethodInfo.localsSize = -(currentLocalOffset+4);
+  
+  currentMethodTable->insert(std::pair<std::string, MethodInfo>(currentMethodName, thisMethodInfo));
+
+  // std::cout<<"HER: " << node->type->basetype <<" - " <<string(compoundType) << "\n";
 }
 
 void TypeCheck::visitMethodBodyNode(MethodBodyNode* node) {
   std::cout << "visitMethodBodyNode" << "\n";
   
   node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary 
 }
 
 void TypeCheck::visitParameterNode(ParameterNode* node) {
   std::cout << "visitParameterNode type:"  << " id: " << node->identifier->name<< "\n";
-  
-  CompoundType compoundType;
-  compoundType.baseType = node->type->basetype;
   std::string currentVarName = node -> identifier -> name;
+  
 
 //   typedef struct variableinfo {
 //   CompoundType type;
 //   int offset;
 //   int size;
 // } VariableInfo;
+  // typedef std::map<std::string, VariableInfo> VariableTable;
+
+  // int counter = 0; 
+  // std::map<std::string, VariableInfo>::iterator iter;
+  // for(iter = currentVariableTable->begin();
+  //       iter != currentVariableTable->end(); iter++) {
+          
+  //         // std::cout<< "her"<< iter->second.offset <<" \n";
+  //         if (iter->second.offset>=12) {
+  //           counter++;
+  //         }
+
+  //   }     
+  node->visit_children(this);
+
+  CompoundType compoundType;
+  compoundType.baseType = node->type->basetype;
+  compoundType.objectClassName = node->type->objectClassName;
+  
+  // if (node->identifier){
+  //   compoundType.objectClassName = node->identifier->name;
+  // }
+
   VariableInfo variableInfo;
   variableInfo.type = compoundType; 
-  variableInfo.offset = 12; //TODO set correct int
+  variableInfo.offset = currentParameterOffset;
   variableInfo.size = 4 ; 
+  currentParameterOffset += 4;
 
   currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
       
   // currentMethodTable.find()
   // WRITEME: Replace with code if necessary
+  
 }
 
 void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
   std::cout << "visitDeclarationNode type:" << "\n";
 
+  node->visit_children(this);
+
   CompoundType compoundType;
   compoundType.baseType = node->type->basetype;
-
+  compoundType.objectClassName = node->type->objectClassName;
+    
   for(std::list<IdentifierNode*>::iterator idNode = node->identifier_list->begin();
         idNode != node->identifier_list->end(); idNode++) {
       
-    std::string currentVarName = (*idNode) -> name;
+      std::string currentVarName = (*idNode) -> name;
+      int size = currentVariableTable->size();
+      VariableInfo variableInfo;
+      variableInfo.type = compoundType; 
+      variableInfo.offset = currentLocalOffset;
+      variableInfo.size = 4 ; 
+      currentLocalOffset -= 4;
+      currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
 
-    VariableInfo variableInfo;
-    variableInfo.type = compoundType; 
-    variableInfo.offset = 12; //TODO set correct int
-    variableInfo.size = 4 ; 
-
-    currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
-
-    }           
+    }       
+    
 }
 
 void TypeCheck::visitReturnStatementNode(ReturnStatementNode* node) {
@@ -293,11 +326,11 @@ void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
 }
 
 void TypeCheck::visitMemberAccessNode(MemberAccessNode* node) {
+  std::cout<<"visitMemberAccessNode"<<"\n";
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitVariableNode(VariableNode* node) {
-  std::cout << "visitVariableNode"<< "\n";
   
   // WRITEME: Replace with code if necessary
 }
@@ -315,18 +348,30 @@ void TypeCheck::visitNewNode(NewNode* node) {
 }
 
 void TypeCheck::visitIntegerTypeNode(IntegerTypeNode* node) {
+  node->basetype = bt_integer;
+
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitBooleanTypeNode(BooleanTypeNode* node) {
   // WRITEME: Replace with code if necessary
+  node->basetype = bt_boolean;
+  
 }
 
 void TypeCheck::visitObjectTypeNode(ObjectTypeNode* node) {
   // WRITEME: Replace with code if necessary
+  node->basetype = bt_object;
+  node->objectClassName = node->identifier->name;
+  std::cout << "ppp "<< node->identifier->name <<"\n";
+
+  
 }
 
 void TypeCheck::visitNoneNode(NoneNode* node) {
+  // std::cout<<"NONE --"<< node->basetype << "\n";
+  node->basetype = bt_none;
+
   // WRITEME: Replace with code if necessary
 }
 
