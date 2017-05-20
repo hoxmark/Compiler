@@ -197,7 +197,6 @@ void TypeCheck::visitParameterNode(ParameterNode* node) {
 
 void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
   std::cout << "visitDeclarationNode type:" << "\n";
-  
 
   CompoundType compoundType;
   compoundType.baseType = node->type->basetype;
@@ -207,7 +206,6 @@ void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
       
     std::string currentVarName = (*idNode) -> name;
 
-
     VariableInfo variableInfo;
     variableInfo.type = compoundType; 
     variableInfo.offset = 12; //TODO set correct int
@@ -215,15 +213,7 @@ void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
 
     currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
 
-
-    }
-    
-    
-      // for(IdentifierNode *idNode : node->identifier_list) {
-
-  // break;
-  
-    
+    }           
 }
 
 void TypeCheck::visitReturnStatementNode(ReturnStatementNode* node) {
