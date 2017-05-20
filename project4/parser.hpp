@@ -125,15 +125,7 @@
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-#line 61 "parser.y"
-{
-	int ival;
-	char *sval;
-}
-/* Line 1529 of yacc.c.  */
-#line 136 "parser.hpp"
-	YYSTYPE;
+typedef int YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

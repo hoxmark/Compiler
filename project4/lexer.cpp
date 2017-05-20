@@ -948,12 +948,12 @@ YY_RULE_SETUP
 case 20:
 YY_RULE_SETUP
 #line 55 "lexer.l"
-{printOut("true"); return T_TRUE;}
+{printOut("true"); yylval.base_int = 1; return T_TRUE;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 56 "lexer.l"
-{printOut("false"); return T_FALSE;}
+{printOut("false"); yylval.base_int = 0; return T_FALSE;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
@@ -1053,12 +1053,12 @@ YY_RULE_SETUP
 case 41:
 YY_RULE_SETUP
 #line 79 "lexer.l"
-{printOut("ITERAL:"); yylval.ival = atoi(yytext); return T_LITERAL;}
+{printOut("ITERAL:"); yylval.base_int  = atoi(yytext); return T_LITERAL;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 81 "lexer.l"
-{printOut("ID:" ); yylval.sval = strdup(yytext); return T_ID; }                     
+{printOut("ID:" ); yylval.base_char_ptr = yytext; char *key = (char*)malloc(yyleng * sizeof(char)); strcpy(key, yytext); yylval.base_char_ptr = key; return T_ID;}                     
 	YY_BREAK
 case 43:
 YY_RULE_SETUP

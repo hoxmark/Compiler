@@ -1,0 +1,40 @@
+class0 {
+    integer	member0;
+
+    f0(arg0 : boolean) -> integer {
+        
+        return 236 * member0;
+
+    }
+
+    f1(arg0 : integer) -> integer {
+        
+        return -arg0;
+
+    }
+
+    class0(arg0 : boolean, arg1 : integer) -> none {
+        
+
+    }
+
+
+}
+
+Main {
+
+
+    main() -> none {
+        class0 local0;
+        integer local1;
+        class0 local2;
+        
+        local1 = local1;
+        local1 = 74 / 152;
+        print 41 - local0.member0 / local0.member0;
+
+    }
+
+
+}
+
