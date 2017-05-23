@@ -16,7 +16,7 @@ class0 {
 
     class0(arg0 : integer, arg1 : integer, arg2 : boolean) -> none {
         integer local0;
-        integer local1;
+        integer local1; 
         boolean local2;
         integer i0;
         

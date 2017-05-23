@@ -14,7 +14,7 @@ class0 {
         local5 = local5;
         print 123;
         print local0 < 30;
-
+ 
     }
 
     f1() -> boolean {

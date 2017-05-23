@@ -7,7 +7,7 @@ class0 {
 
     class0(arg0 : boolean, arg1 : integer) -> none {
         integer local0;
-        integer local1;
+        integer local1; 
         integer local2;
         integer local3;
         

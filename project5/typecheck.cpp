@@ -46,7 +46,7 @@ void typeError(TypeErrorCode code) {
     case constructor_returns_type:
       std::cerr << "Class constructor returns a value." << std::endl;
       break;
-    case no_main_class:
+    case no_main_class: //DONE
       std::cerr << "The \"Main\" class was not found." << std::endl;
       break;
     case main_class_members_present:
@@ -77,6 +77,18 @@ void TypeCheck::visitProgramNode(ProgramNode* node) {
   node->visit_children(this);
 
   //Type: No Main Class - no_main_class 
+  if ((*classTable).count("Main")==1){
+    // std::cout << "#OK"<<"\n";
+  } else {
+    // std::cout<< "#NOTOK"<<"\n";
+    typeError(no_main_class);
+  }
+
+    // ClassInfo *classInfo = &(*classTable)["Main"];
+    // // Methodinfo *methodInfo = &(*classInfo)[];
+    
+    // std::cout<< "name of classes" <<  &classInfo  <<"\n";
+
 
 }
 
@@ -91,17 +103,6 @@ void TypeCheck::visitClassNode(ClassNode* node) {
   } else {
     currentSuperClassName = "";    
   }
-  
-//   typedef struct classinfo {
-//   std::string superClassName;
-//   MethodTable *methods;
-//   VariableTable *members;
-//   int membersSize;
-// } ClassInfo;
-
-
-  // // std::cout << "visitClassNode name: "<< currentClassName << " with super: " << currentSuperClassName <<"\n";
-
 
   ClassInfo thisClassInfo;
   thisClassInfo.superClassName = currentSuperClassName;
@@ -147,14 +148,6 @@ void TypeCheck::visitMethodNode(MethodNode* node) {
 
   // // std::cout << "visitMethodNode " << currentMethodName <<"\n";
 
-//   typedef struct methodinfo {
-//   CompoundType returnType;
-//   VariableTable *variables; //Done
-//   std::list<CompoundType> *parameters; 
-//   int localsSize; //TODO
-// } MethodInfo;
-
-
   currentParameterOffset = 12;
   currentLocalOffset = -4;
 
@@ -190,34 +183,11 @@ void TypeCheck::visitParameterNode(ParameterNode* node) {
   // // std::cout << "visitParameterNode type:"  << " id: " << node->identifier->name<< "\n";
   std::string currentVarName = node -> identifier -> name;
   
-
-//   typedef struct variableinfo {
-//   CompoundType type;
-//   int offset;
-//   int size;
-// } VariableInfo;
-  // typedef std::map<std::string, VariableInfo> VariableTable;
-
-  // int counter = 0; 
-  // std::map<std::string, VariableInfo>::iterator iter;
-  // for(iter = currentVariableTable->begin();
-  //       iter != currentVariableTable->end(); iter++) {
-          
-          // // std::cout<< "her"<< iter->second.offset <<" \n";
-  //         if (iter->second.offset>=12) {
-  //           counter++;
-  //         }
-
-  //   }     
   node->visit_children(this);
 
   CompoundType compoundType;
   compoundType.baseType = node->type->basetype;
   compoundType.objectClassName = node->type->objectClassName;
-  
-  // if (node->identifier){
-  //   compoundType.objectClassName = node->identifier->name;
-  // }
 
   VariableInfo variableInfo;
   variableInfo.type = compoundType; 
@@ -226,22 +196,13 @@ void TypeCheck::visitParameterNode(ParameterNode* node) {
   currentParameterOffset += 4;
 
   (*currentVariableTable)[currentVarName] = variableInfo;
-  
-  // currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
-      
-  // currentMethodTable.find()
-  // WRITEME: Replace with code if necessary
-  
+    
 }
 
 void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
   // // std::cout << "visitDeclarationNode type:" <<  "\n";
-  
-  //  if((*classTable)[currentClassName].members == *currentVariableTable){
-  // std::cout<<"&(*classTable)[currentClassName].members: \t" <<  << "\n";
-  // std::cout<<"&currentVariableTable: \t\t\t\t" <<  << "\n";
+ 
   if ((*classTable)[currentClassName].members == this->currentVariableTable){
-    // std::cout<<"xxxx: " << &currentVariableTable << "\n";
     node->visit_children(this);
 
     CompoundType compoundType;
@@ -260,8 +221,6 @@ void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
         currentLocalOffset += 4;
         (*currentVariableTable)[currentVarName] = variableInfo;
         
-        // currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
-
       }       
 
   } else {
@@ -282,35 +241,40 @@ void TypeCheck::visitDeclarationNode(DeclarationNode* node) {
         variableInfo.size = 4 ; 
         currentLocalOffset -= 4;
         (*currentVariableTable)[currentVarName] = variableInfo;
-        
-        // currentVariableTable->insert(std::pair<std::string, VariableInfo>(currentVarName, variableInfo));
-
+      
       }       
-
-
-  }
-
-    
+  }    
 }
 
 void TypeCheck::visitReturnStatementNode(ReturnStatementNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
 }
 
 void TypeCheck::visitAssignmentNode(AssignmentNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
 }
 
 void TypeCheck::visitCallNode(CallNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
 }
 
 void TypeCheck::visitIfElseNode(IfElseNode* node) {
   // WRITEME: Replace with code if necessary
+  
+  //if_predicate_type_mismatch  
+  node->visit_children(this);
+  
+  std::cout << "her:" <<node->expression->basetype<<"\n";
 }
 
 void TypeCheck::visitWhileNode(WhileNode* node) {
   // WRITEME: Replace with code if necessary
+  //while_predicate_type_mismatch
+
+
 }
 
 void TypeCheck::visitRepeatNode(RepeatNode* node) {
@@ -318,11 +282,17 @@ void TypeCheck::visitRepeatNode(RepeatNode* node) {
 }
 
 void TypeCheck::visitPrintNode(PrintNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitPlusNode(PlusNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+  
+  // std::cout <<"plus1"<< node->expression_1->basetype << "\n";
+  // std::cout <<"plus2"<< node->expression_2->basetype << "\n";
 }
 
 void TypeCheck::visitMinusNode(MinusNode* node) {
@@ -331,6 +301,8 @@ void TypeCheck::visitMinusNode(MinusNode* node) {
 
 void TypeCheck::visitTimesNode(TimesNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+  
 }
 
 void TypeCheck::visitDivideNode(DivideNode* node) {
@@ -339,55 +311,114 @@ void TypeCheck::visitDivideNode(DivideNode* node) {
 
 void TypeCheck::visitLessNode(LessNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+
+  // CompoundType compoundType;
+  // compoundType.baseType = node->expression_1->basetype;
+
+  // std::cout <<"lessNode1 "<< string(compoundType) << "\n";
+  // std::cout <<"lessNode2 "<< node->expression_2->basetype << "\n";
 }
 
 void TypeCheck::visitLessEqualNode(LessEqualNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitEqualNode(EqualNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitAndNode(AndNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitOrNode(OrNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+
+  // CompoundType compoundType;
+  // compoundType.baseType = node->expression_1->basetype;
+
+  // std::cout <<"OR1 "<< node->expression_1->basetype << "\n";
+  // std::cout <<"OR2 "<< node->expression_2->basetype << "\n";
+
+  // if (node->expression_1->basetype != 1 || node->expression_2->basetype != 1){
+  //   typeError(expression_type_mismatch);
+  // } 
+
 }
 
 void TypeCheck::visitNotNode(NotNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitNegationNode(NegationNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitMemberAccessNode(MemberAccessNode* node) {
+  node->visit_children(this);
+  
   // // std::cout<<"visitMemberAccessNode"<<"\n";
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitVariableNode(VariableNode* node) {
+  std::string nodeId = node->identifier->name;
+  ClassInfo *classInfo =  &(*classTable)[currentClassName];
+  std::string superClassname = (*classInfo).superClassName;
+
+  std::cout << "id: \t"<< nodeId << "\n";
+  std::cout << "super: \t"<< superClassname << "\n";
+  std::cout << "currentVariableTable\t"<< (*currentVariableTable).count(nodeId) << "\n";
+  std::cout << "classInfo.members\t"<< (*classInfo).members->count(nodeId) << "\n";
+  if (superClassname != ""){
+    ClassInfo *superClassInfo = &(*classTable)[superClassname];
+    if (((*currentVariableTable).count(nodeId) == 0) && ((*classInfo).members->count(nodeId) == 0) && ((*superClassInfo).members->count(nodeId)==0 )){
+      typeError(undefined_variable);
+    }
+
+  } else {
+    if (((*currentVariableTable).count(nodeId) == 0) && ((*classInfo).members->count(nodeId) == 0) ){
+      typeError(undefined_variable);
+    }
+  }
   
-  // WRITEME: Replace with code if necessary
 }
 
+
 void TypeCheck::visitIntegerLiteralNode(IntegerLiteralNode* node) {
+  // node->basetype = 0;    
+  std::cout<<"visitIntegerLiteralNode"<<"\n";
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitBooleanLiteralNode(BooleanLiteralNode* node) {
+  node->basetype = bt_boolean;  
+  std::cout<<"visitBooleanLiteralNode"<<node->integer->value<<"\n";
+  std::cout<<node->integer->value<<"\n";
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitNewNode(NewNode* node) {
+  node->visit_children(this);
+  
   // WRITEME: Replace with code if necessary
 }
 
@@ -454,7 +485,6 @@ std::string string(CompoundType type) {
   }
 }
 
-
 void print(VariableTable variableTable, int indent) {
   std::cout << genIndent(indent) << "VariableTable {";
   if (variableTable.size() == 0) {
@@ -514,3 +544,15 @@ void print(ClassTable classTable, int indent) {
 void print(ClassTable classTable) {
   print(classTable, 0);
 }
+
+  // int counter = 0; 
+  // std::map<std::string, VariableInfo>::iterator iter;
+  // for(iter = currentVariableTable->begin();
+  //       iter != currentVariableTable->end(); iter++) {
+          
+          // // std::cout<< "her"<< iter->second.offset <<" \n";
+  //         if (iter->second.offset>=12) {
+  //           counter++;
+  //         }
+
+  //   }    
