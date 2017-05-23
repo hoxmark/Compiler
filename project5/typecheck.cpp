@@ -67,8 +67,6 @@ void typeError(TypeErrorCode code) {
 // Not all functions must have code, many may be left empty.
 
 void TypeCheck::visitProgramNode(ProgramNode* node) {
-
-  // WRITEME: Replace with code if necessary
   // Det er her det starter. 
   // std::cout << node << "\n";
   // // std::cout << "visitProgramNode" << "\n";
@@ -77,6 +75,9 @@ void TypeCheck::visitProgramNode(ProgramNode* node) {
   // classTable->insert(std::pair<std::string, ClassInfo>(currentClassName, thisClassInfo));
   
   node->visit_children(this);
+
+  //Type: No Main Class - no_main_class 
+
 }
 
 void TypeCheck::visitClassNode(ClassNode* node) {
