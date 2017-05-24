@@ -100,9 +100,20 @@ void TypeCheck::visitClassNode(ClassNode* node) {
   // Setting superclassname 
   if (node->identifier_2){
     currentSuperClassName = node->identifier_2->name;
+    
+    //TYPE:  undefined_class
+    if ((*classTable).count(currentSuperClassName)!=1){
+      typeError(undefined_class);
+    }
+
+
   } else {
     currentSuperClassName = "";    
   }
+
+
+  
+
 
   ClassInfo thisClassInfo;
   thisClassInfo.superClassName = currentSuperClassName;
@@ -142,11 +153,30 @@ void TypeCheck::visitClassNode(ClassNode* node) {
   
 }
 
+// bool TypeCheck::isMethodInSuperClass(ClassNode* node){
+//   std::string currentSuperClassName;
+//   // Setting superclassname  
+//   if (node->identifier_2){
+//     // currentSuperClassName = node->identifier_2->name;
+//     // //Sjekk
+//     // ClassInfo sClassinfo = (*classTable)[currentSuperClassName]; 
+//     // if (sClassinfo->methods->count(methodName)==1){
+//     //   return true; 
+//     // }
+
+//     // //neste 
+//     // return isMethodInSuperClass((*classTable)[currentSuperClassName], methodName);
+  
+//     return false; 
+
+//   } else {
+//     return false ;
+//   }
+// }
+
 void TypeCheck::visitMethodNode(MethodNode* node) {
   // // std::cout << "visitMethodNode" << "\n";
   std::string currentMethodName = node -> identifier -> name;
-
-  // // std::cout << "visitMethodNode " << currentMethodName <<"\n";
 
   currentParameterOffset = 12;
   currentLocalOffset = -4;
@@ -166,10 +196,16 @@ void TypeCheck::visitMethodNode(MethodNode* node) {
   thisMethodInfo.localsSize = -(currentLocalOffset+4);
   (*currentMethodTable)[currentMethodName] = thisMethodInfo;
   
-  // currentMethodTable->insert(std::pair<std::string, MethodInfo>(currentMethodName, thisMethodInfo));
 
-  // std::cout<<"HER: " << node->type->basetype <<" - " <<string(compoundType) << "\n";
+
+
+    
+
+    
+    
+
 }
+
 
 void TypeCheck::visitMethodBodyNode(MethodBodyNode* node) {
   // // std::cout << "visitMethodBodyNode" << "\n";
@@ -273,12 +309,16 @@ void TypeCheck::visitIfElseNode(IfElseNode* node) {
 void TypeCheck::visitWhileNode(WhileNode* node) {
   // WRITEME: Replace with code if necessary
   //while_predicate_type_mismatch
+  node->visit_children(this);
+  
 
 
 }
 
 void TypeCheck::visitRepeatNode(RepeatNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+  
 }
 
 void TypeCheck::visitPrintNode(PrintNode* node) {
@@ -367,7 +407,52 @@ void TypeCheck::visitNegationNode(NegationNode* node) {
 }
 
 void TypeCheck::visitMethodCallNode(MethodCallNode* node) {
+  std::cout<< "visitMethodCallNode" << "\n";
   node->visit_children(this);
+
+  std::string identifier_1 = node -> identifier_1 -> name;
+  
+
+  /*  
+    Undefined Method - undefined_method 
+    This applies when a method is called on an object (or on the current object) 
+    that does not exist in the class of that object or any super class.
+    */
+    //TYPE undefined_method in this class. 
+    ClassInfo classinfo = (*classTable)[currentClassName];
+    bool inCurrentClassinfo;
+    if (classinfo.methods->count(identifier_1)==0){
+      inCurrentClassinfo = false;
+    } else {
+      inCurrentClassinfo = true;
+    }
+    
+
+    bool inValidClassinfo;
+    if(node -> identifier_2){
+      std::string identifier_2 = node -> identifier_2 -> name;
+      VariableInfo variableInfo = (*currentVariableTable)[identifier_2];
+      std::cout << "variableInfo Info: " + string(variableInfo.type) + "\n";
+      // ClassInfo classinfo = (*classTable)[identifier_1];    
+      // if (classinfo->methods->count(identifier_2)==0){
+      //   inCurrentClassinfo = false;
+      // } else {
+      //   inCurrentClassinfo = true;
+      // }
+    }
+
+
+
+
+    std::cout<< "REC START"<<"\n";
+    // bool inSuperClass = isMethodInSuperClass( &(*classTable)[currentClassName]);
+    std::cout<< "REC STOP"<<"\n";
+
+
+   //TYPE:  undefined_class TODO CONSTRUCTOR
+    // if ((*classTable).count(nodeId)!=1){
+    //   typeError(undefined_class);
+    // }
   
   // WRITEME: Replace with code if necessary
 }
@@ -384,10 +469,10 @@ void TypeCheck::visitVariableNode(VariableNode* node) {
   ClassInfo *classInfo =  &(*classTable)[currentClassName];
   std::string superClassname = (*classInfo).superClassName;
 
-  std::cout << "id: \t"<< nodeId << "\n";
-  std::cout << "super: \t"<< superClassname << "\n";
-  std::cout << "currentVariableTable\t"<< (*currentVariableTable).count(nodeId) << "\n";
-  std::cout << "classInfo.members\t"<< (*classInfo).members->count(nodeId) << "\n";
+  // std::cout << "id: \t"<< nodeId << "\n";
+  // std::cout << "super: \t"<< superClassname << "\n";
+  // std::cout << "currentVariableTable\t"<< (*currentVariableTable).count(nodeId) << "\n";
+  // std::cout << "classInfo.members\t"<< (*classInfo).members->count(nodeId) << "\n";
   if (superClassname != ""){
     ClassInfo *superClassInfo = &(*classTable)[superClassname];
     if (((*currentVariableTable).count(nodeId) == 0) && ((*classInfo).members->count(nodeId) == 0) && ((*superClassInfo).members->count(nodeId)==0 )){
@@ -399,12 +484,12 @@ void TypeCheck::visitVariableNode(VariableNode* node) {
       typeError(undefined_variable);
     }
   }
-  
+
 }
 
 
 void TypeCheck::visitIntegerLiteralNode(IntegerLiteralNode* node) {
-  // node->basetype = 0;    
+  node->basetype = bt_integer;    
   std::cout<<"visitIntegerLiteralNode"<<"\n";
   // WRITEME: Replace with code if necessary
 }
