@@ -54,7 +54,7 @@ class0 {
                     }
                 }
                 print false;
-                if local5 { /* TYPE ERROR THIS LINE **/
+                if local5  { /* TYPE ERROR THIS LINE **/
                     if false {
                         if local4 or local3 {
                             print member3 equals 92;

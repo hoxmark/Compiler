@@ -7,6 +7,10 @@
         "chrono": "cpp",
         "map": "cpp",
         "__locale": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "iterator": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "array": "cpp"
     }
 }

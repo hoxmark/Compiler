@@ -305,7 +305,12 @@ void TypeCheck::visitIfElseNode(IfElseNode *node)
   node->visit_children(this);
 
   // std::cout << "node: " << node->expression << "\n";
-  // std::cout << "her: " << node->expression->basetype << "\n";
+  std::cout << "her: " << node->expression->basetype << "\n";
+
+  if (node->expression->basetype != 1 ){
+    typeError(if_predicate_type_mismatch);
+  }
+
 }
 
 void TypeCheck::visitWhileNode(WhileNode *node)
@@ -363,11 +368,37 @@ void TypeCheck::visitLessNode(LessNode *node)
 
   // std::cout <<"lessNode1 "<< string(compoundType) << "\n";
   // std::cout <<"lessNode2 "<< node->expression_2->basetype << "\n";
+
+  CompoundType compoundType;
+  compoundType.baseType = node->expression_1->basetype;
+
+  std::cout << "LESSTHAN1 " << node->expression_1->basetype << "\n";
+  std::cout << "LESSTHAN2 " << node->expression_2->basetype << "\n";
+
+  // if ()
+  if (node->expression_1->basetype != 0 || node->expression_2->basetype != 0){
+    typeError(expression_type_mismatch);
+  } else {
+    node->basetype = bt_boolean;
+  }
 }
 
 void TypeCheck::visitLessEqualNode(LessEqualNode *node)
 {
   node->visit_children(this);
+
+  CompoundType compoundType;
+  compoundType.baseType = node->expression_1->basetype;
+
+  std::cout << "LESSEQUALTHAN1 " << node->expression_1->basetype << "\n";
+  std::cout << "LESSEQUALTHAN2 " << node->expression_2->basetype << "\n";
+
+  // if ()
+  if (node->expression_1->basetype != 0 || node->expression_2->basetype != 0){
+    typeError(expression_type_mismatch);
+  } else {
+    node->basetype = bt_boolean;
+  }
 
   // WRITEME: Replace with code if necessary
 }
@@ -375,7 +406,20 @@ void TypeCheck::visitLessEqualNode(LessEqualNode *node)
 void TypeCheck::visitEqualNode(EqualNode *node)
 {
   node->visit_children(this);
+  node->visit_children(this);
 
+  CompoundType compoundType;
+  compoundType.baseType = node->expression_1->basetype;
+  
+  std::cout << "EQUAL1 " << node->expression_1->basetype << "\n";
+  std::cout << "EQUAL2 " << node->expression_2->basetype << "\n";
+
+  // if ()TODO Should this only be INT? 
+  if (node->expression_1->basetype != 0 || node->expression_2->basetype != 0){
+    typeError(expression_type_mismatch);
+  } else {
+    node->basetype = bt_boolean;
+  }
   // WRITEME: Replace with code if necessary
 }
 
@@ -383,7 +427,19 @@ void TypeCheck::visitAndNode(AndNode *node)
 {
   node->visit_children(this);
 
-  // WRITEME: Replace with code if necessary
+
+  CompoundType compoundType;
+  compoundType.baseType = node->expression_1->basetype;
+
+  std::cout << "AND1 " << node->expression_1->basetype << "\n";
+  std::cout << "AND2 " << node->expression_2->basetype << "\n";
+
+  // if ()
+  if (node->expression_1->basetype != 1 || node->expression_2->basetype != 1){
+    typeError(expression_type_mismatch);
+  } else {
+    node->basetype = bt_boolean;
+  }
 }
 
 void TypeCheck::visitOrNode(OrNode *node)
@@ -394,12 +450,15 @@ void TypeCheck::visitOrNode(OrNode *node)
   CompoundType compoundType;
   compoundType.baseType = node->expression_1->basetype;
 
-  std::cout <<"OR1 "<< node->expression_1->basetype << "\n";
-  std::cout <<"OR2 "<< node->expression_2->basetype << "\n";
+  // std::cout << "OR1 " << node->expression_1->basetype << "\n";
+  // std::cout << "OR2 " << node->expression_2->basetype << "\n";
 
-  // if (node->expression_1->basetype != 1 || node->expression_2->basetype != 1){
-  //   typeError(expression_type_mismatch);
-  // }
+  // if ()
+  if (node->expression_1->basetype != 1 || node->expression_2->basetype != 1){
+    typeError(expression_type_mismatch);
+  } else {
+    node->basetype = bt_boolean;
+  }
 }
 
 void TypeCheck::visitNotNode(NotNode *node)
@@ -432,7 +491,7 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
 
     if (node->identifier_1)
     {
-      //TODO MAKE THIS RECURSIV. 
+      //TODO MAKE THIS RECURSIV.
       std::string ObjectId = node->identifier_1->name;
       VariableInfo variableInfo = (*currentVariableTable)[ObjectId];
       // std::cout << "ObjectID:: " << ObjectId << "\n";
@@ -452,7 +511,9 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
           inObjectsClassinfo = false;
           // std::cout << "inValidClassinfo false \n";
         }
-      } else {
+      }
+      else
+      {
         //TYPE not_object
         typeError(not_object);
       }
@@ -465,7 +526,7 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
     if (classinfo.methods->count(identifier_1) == 1)
     {
       inCurrentClassinfo = true;
-      // std::cout << "inCurrentClassinfo True \n ";                
+      // std::cout << "inCurrentClassinfo True \n ";
     }
     else
     {
@@ -496,7 +557,6 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
   // bool inSuperClass = isMethodInSuperClass( &(*classTable)[currentClassName]);
 
   // std::cout << "REC STOP\n";
-            
 
   //TYPE:  undefined_class TODO CONSTRUCTOR
   // if ((*classTable).count(nodeId)!=1){
@@ -526,17 +586,37 @@ void TypeCheck::visitVariableNode(VariableNode *node)
   // std::cout << "classInfo.members\t"<< (*classInfo).members->count(nodeId) << "\n";
   if (superClassname != "")
   {
+    //TODO MAKE RECURSIV
     ClassInfo *superClassInfo = &(*classTable)[superClassname];
-    if (((*currentVariableTable).count(nodeId) == 0) && ((*classInfo).members->count(nodeId) == 0) && ((*superClassInfo).members->count(nodeId) == 0))
+    bool varInVarTable = ((*currentVariableTable).count(nodeId) == 1);
+    bool varInclassInfoMember = ((*classInfo).members->count(nodeId) == 1);
+    bool varInSuperClassInfoMember = ((*superClassInfo).members->count(nodeId) == 1);
+
+    if (!varInVarTable && !varInclassInfoMember && !varInSuperClassInfoMember)
     {
       typeError(undefined_variable);
     }
   }
   else
   {
-    if (((*currentVariableTable).count(nodeId) == 0) && ((*classInfo).members->count(nodeId) == 0))
+    bool varInVarTable = ((*currentVariableTable).count(nodeId) == 1);
+    bool varInclassInfoMember = ((*classInfo).members->count(nodeId) == 1);
+
+    if (!varInVarTable && !varInclassInfoMember)
     {
       typeError(undefined_variable);
+    }
+    else if (varInVarTable)
+    {
+      //TODO CORRECT?      
+      
+      VariableInfo variableInfo = (*currentVariableTable)[nodeId];
+      node->basetype = variableInfo.type.baseType;
+    }
+    else if (varInclassInfoMember)
+    {
+      //TODO CORRECT?      
+      node->basetype = (*(*classInfo).members)[nodeId].type.baseType;
     }
   }
 }
