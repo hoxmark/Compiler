@@ -304,7 +304,8 @@ void TypeCheck::visitIfElseNode(IfElseNode *node)
   //if_predicate_type_mismatch
   node->visit_children(this);
 
-  // std::cout << "her:" << node->expression->basetype << "\n";
+  // std::cout << "node: " << node->expression << "\n";
+  // std::cout << "her: " << node->expression->basetype << "\n";
 }
 
 void TypeCheck::visitWhileNode(WhileNode *node)
@@ -390,11 +391,11 @@ void TypeCheck::visitOrNode(OrNode *node)
   // WRITEME: Replace with code if necessary
   node->visit_children(this);
 
-  // CompoundType compoundType;
-  // compoundType.baseType = node->expression_1->basetype;
+  CompoundType compoundType;
+  compoundType.baseType = node->expression_1->basetype;
 
-  // std::cout <<"OR1 "<< node->expression_1->basetype << "\n";
-  // std::cout <<"OR2 "<< node->expression_2->basetype << "\n";
+  std::cout <<"OR1 "<< node->expression_1->basetype << "\n";
+  std::cout <<"OR2 "<< node->expression_2->basetype << "\n";
 
   // if (node->expression_1->basetype != 1 || node->expression_2->basetype != 1){
   //   typeError(expression_type_mismatch);
@@ -451,6 +452,9 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
           inObjectsClassinfo = false;
           // std::cout << "inValidClassinfo false \n";
         }
+      } else {
+        //TYPE not_object
+        typeError(not_object);
       }
     }
   }
