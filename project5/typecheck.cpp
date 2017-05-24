@@ -2,7 +2,7 @@
 
 // Defines the function used to throw type errors. The possible
 // type errors are defined as an enumeration in the header file.
-voidtypeError(TypeErrorCode code)
+void typeError(TypeErrorCode code)
 {
   switch (code)
   {
