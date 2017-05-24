@@ -304,7 +304,7 @@ void TypeCheck::visitIfElseNode(IfElseNode *node)
   //if_predicate_type_mismatch
   node->visit_children(this);
 
-  std::cout << "her:" << node->expression->basetype << "\n";
+  // std::cout << "her:" << node->expression->basetype << "\n";
 }
 
 void TypeCheck::visitWhileNode(WhileNode *node)
@@ -417,13 +417,57 @@ void TypeCheck::visitNegationNode(NegationNode *node)
 
 void TypeCheck::visitMethodCallNode(MethodCallNode *node)
 {
-  std::cout << "visitMethodCallNode"
-            << "\n";
+  // std::cout << "visitMethodCallNode\n";
   node->visit_children(this);
   std::string identifier_2;
+  std::string identifier_1;
+  bool inCurrentClassinfo = false;
+  bool inObjectsClassinfo = false;
+
+  //if det er object.
   if (node->identifier_2)
   {
-    identifier_2 = node->identifier_2->name;
+    std::string methodId = node->identifier_2->name;
+
+    if (node->identifier_1)
+    {
+      //TODO MAKE THIS RECURSIV. 
+      std::string ObjectId = node->identifier_1->name;
+      VariableInfo variableInfo = (*currentVariableTable)[ObjectId];
+      // std::cout << "ObjectID:: " << ObjectId << "\n";
+      // std::cout << "MethodID:: " << methodId << "\n";
+      // std::cout << "variableInfo Info: " << string(variableInfo.type) << "\n";
+      // std::cout << "classname: " + variableInfo.type.objectClassName << "\n";
+      if (variableInfo.type.objectClassName != "")
+      {
+        ClassInfo classinfo = (*classTable)[variableInfo.type.objectClassName];
+        if (classinfo.methods->count(methodId) == 1)
+        {
+          inObjectsClassinfo = true;
+          // std::cout << "inValidClassinfo true \n";
+        }
+        else
+        {
+          inObjectsClassinfo = false;
+          // std::cout << "inValidClassinfo false \n";
+        }
+      }
+    }
+  }
+  else
+  {
+    identifier_1 = node->identifier_1->name;
+    ClassInfo classinfo = (*classTable)[currentClassName];
+    if (classinfo.methods->count(identifier_1) == 1)
+    {
+      inCurrentClassinfo = true;
+      // std::cout << "inCurrentClassinfo True \n ";                
+    }
+    else
+    {
+      inCurrentClassinfo = false;
+      // std::cout << "inCurrentClassinfo False \n";
+    }
   }
   /*  
     Undefined Method - undefined_method 
@@ -431,65 +475,24 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
     that does not exist in the class of that object or any super class.
     */
   //TYPE undefined_method in this class.
-  ClassInfo classinfo = (*classTable)[currentClassName];
-  bool inCurrentClassinfo;
-  if (classinfo.methods->count(identifier_2) == 1)
+
+  if (inObjectsClassinfo || inCurrentClassinfo)
   {
-    inCurrentClassinfo = true;
-    std::cout << "inCurrentClassinfo True "
-              << "\n";
+
+    // std::cout << "ONE OK \n";
   }
   else
   {
-    inCurrentClassinfo = false;
-    std::cout << "inCurrentClassinfo False "
-              << "\n";
+    // std::cout << "NOT OK\n";
+    typeError(undefined_method);
   }
 
-  bool inValidClassinfo = false;
-  if (node->identifier_1)
-  {
-    std::string identifier_1 = node->identifier_1->name;
-    VariableInfo variableInfo = (*currentVariableTable)[identifier_1];
-    std::cout << "identifier_1:: " << identifier_1 << "\n";
-    std::cout << "identifier_2:: " << identifier_2 << "\n";
-    std::cout << "variableInfo Info: " << string(variableInfo.type) << "\n";
-    std::cout << "classname: " + variableInfo.type.objectClassName << "\n";
-    if (variableInfo.type.objectClassName != "")
-    {
-      ClassInfo classinfo = (*classTable)[variableInfo.type.objectClassName];
-      if (classinfo.methods->count(identifier_2) == 1)
-      {
-        inValidClassinfo = true;
-        std::cout << "inValidClassinfo true  "
-                  << "\n";
-      }
-      else
-      {
-        inValidClassinfo = false;
-        std::cout << "inValidClassinfo false "
-                  << "\n";
-      }
-    }
-  }
+  // std::cout << "REC START\n";
 
-  if (inValidClassinfo || inCurrentClassinfo)
-  {
-    std::cout << "ONE OK "
-              << "\n";
-  }
-  else
-  {
-    std::cout << "NOT OK"
-              << "\n";
-    // typeError(undefined_method);
-  }
-
-  std::cout << "REC START"
-            << "\n";
   // bool inSuperClass = isMethodInSuperClass( &(*classTable)[currentClassName]);
-  std::cout << "REC STOP"
-            << "\n";
+
+  // std::cout << "REC STOP\n";
+            
 
   //TYPE:  undefined_class TODO CONSTRUCTOR
   // if ((*classTable).count(nodeId)!=1){
@@ -537,16 +540,15 @@ void TypeCheck::visitVariableNode(VariableNode *node)
 void TypeCheck::visitIntegerLiteralNode(IntegerLiteralNode *node)
 {
   node->basetype = bt_integer;
-  std::cout << "visitIntegerLiteralNode"
-            << "\n";
+  // std::cout << "visitIntegerLiteralNode\n";
   // WRITEME: Replace with code if necessary
 }
 
 void TypeCheck::visitBooleanLiteralNode(BooleanLiteralNode *node)
 {
   node->basetype = bt_boolean;
-  std::cout << "visitBooleanLiteralNode" << node->integer->value << "\n";
-  std::cout << node->integer->value << "\n";
+  // std::cout << "visitBooleanLiteralNode" << node->integer->value << "\n";
+  // std::cout << node->integer->value << "\n";
   // WRITEME: Replace with code if necessary
 }
 
