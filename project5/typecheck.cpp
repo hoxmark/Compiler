@@ -580,56 +580,57 @@ void TypeCheck::visitMemberAccessNode(MemberAccessNode *node)
   // WRITEME: Replace with code if necessary
 }
 
-void TypeCheck::visitVariableNode(VariableNode *node)
-{
-  node->visit_children(this);
-  
-  bool isLegal = false;
+void TypeCheck::visitVariableNode(VariableNode* node) {
+    node->visit_children(this);
 
-  std::string nodeId = node->identifier->name;
-  ClassInfo *classInfo = &(*classTable)[currentClassName];
-  std::string superClassname = (*classInfo).superClassName;
+    VariableInfo variableInfo;
+    
+    bool isLegal = false; 
+    std::string nodeId = node->identifier->name;
+    // std::string sClassname = (*classInfo).superClassName;
+    bool varInVarTable = ((*currentVariableTable).count(nodeId) == 1); //Var in variableTable? 
+
 
   // std::cout << "id: \t"<< nodeId << "\n";
-  // std::cout << "super: \t"<< superClassname << "\n";
+  // std::cout << "super: \t"<< sClassname << "\n";
   // std::cout << "currentVariableTable\t"<< (*currentVariableTable).count(nodeId) << "\n";
   // std::cout << "classInfo.members\t"<< (*classInfo).members->count(nodeId) << "\n";
-  if (superClassname != "")
-  {
-    //TODO MAKE RECURSIV
-    ClassInfo *superClassInfo = &(*classTable)[superClassname];
-    bool varInVarTable = ((*currentVariableTable).count(nodeId) == 1);
-    bool varInclassInfoMember = ((*classInfo).members->count(nodeId) == 1);
-    bool varInSuperClassInfoMember = ((*superClassInfo).members->count(nodeId) == 1);
 
-    if (!varInVarTable && !varInclassInfoMember && !varInSuperClassInfoMember)
+    if (varInVarTable) {
+        isLegal = true;
+        variableInfo = (*this->currentVariableTable)[nodeId];
+    } 
+    else 
     {
-      typeError(undefined_variable);
-    }
-  }
-  else
-  {
-    bool varInVarTable = ((*currentVariableTable).count(nodeId) == 1);
-    bool varInclassInfoMember = ((*classInfo).members->count(nodeId) == 1);
+        std::string tempSCName = this->currentClassName;
+        while (tempSCName != "") {
+            VariableTable* localClassMem = (*classTable)[tempSCName].members;
+            
+            bool varInSuperClass = ((*localClassMem).count(nodeId) == 1);
 
-    if (!varInVarTable && !varInclassInfoMember)
-    {
-      typeError(undefined_variable);
+            if (varInSuperClass) {
+                isLegal = true;
+                variableInfo = (*localClassMem)[nodeId];
+                break;
+            } 
+            else 
+            {
+                tempSCName = (*this->classTable)[tempSCName].superClassName;
+            }
+        }
     }
-    else if (varInVarTable)
-    {
-      //TODO CORRECT?      
-      
-      VariableInfo variableInfo = (*currentVariableTable)[nodeId];
-      node->basetype = variableInfo.type.baseType;
+
+    if (!isLegal){
+        // std::cout<<"TEST"
+        typeError(undefined_variable);
     }
-    else if (varInclassInfoMember)
-    {
-      //TODO CORRECT?      
-      node->basetype = (*(*classInfo).members)[nodeId].type.baseType;
-    }
-  }
+
+
+    node->basetype = variableInfo.type.baseType; //Back the way before the traverse
+    node->objectClassName = variableInfo.type.objectClassName; //Back the way before the traverse
 }
+
+
 
 // void TypeCheck::visitVariableNode(VariableNode *node)
 // {
