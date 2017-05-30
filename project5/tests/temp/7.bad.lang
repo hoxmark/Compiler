@@ -78,7 +78,7 @@ class1 extends class0 {
     integer	member3;
 
     f3(arg0 : integer, arg1 : boolean) -> none {
-        boolean local0;
+        boolean local0; 
         class0 local1;
         integer local2;
         class0 local3;
