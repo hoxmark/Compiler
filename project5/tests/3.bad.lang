@@ -13,7 +13,7 @@ class0 {
         
         local2 = member0;
         i0 = 891;
-        while 33 <= i0 {
+        while 33 <= i0 { 
              i0 = i0 / 3;
         
             if local1 {

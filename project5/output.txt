@@ -1207,3 +1207,4 @@ Method called with incorrect number of arguments.
 
 ./lang < tests/23.bad.lang:
 Undefined variable.
+
