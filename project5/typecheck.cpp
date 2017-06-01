@@ -260,7 +260,6 @@ void TypeCheck::visitIfElseNode(IfElseNode *node)
   // std::cout << "node: " << node->expression << "\n";
   // std::cout << "her: " << node->expression->basetype << "\n";
 
-  //TODO FIND ERROR
   if (node->expression->basetype != 1)
   {
     typeError(if_predicate_type_mismatch);
@@ -496,7 +495,6 @@ void TypeCheck::visitMethodCallNode(MethodCallNode *node)
   if (node->identifier_2)
   {
     // std::cout << " Method:  if its an object. \n";
-
     VariableInfo variableInfo = (*currentVariableTable)[ObjectId];
     // std::cout << "ObjectID:: " << ObjectId << "\n";
     // std::cout << "MethodID:: " << methodId << "\n";
@@ -788,15 +786,3 @@ void print(ClassTable classTable)
 {
   print(classTable, 0);
 }
-
-// int counter = 0;
-// std::map<std::string, VariableInfo>::iterator iter;
-// for(iter = currentVariableTable->begin();
-//       iter != currentVariableTable->end(); iter++) {
-
-// // std::cout<< "her"<< iter->second.offset <<" \n";
-//         if (iter->second.offset>=12) {
-//           counter++;
-//         }
-
-//   }
